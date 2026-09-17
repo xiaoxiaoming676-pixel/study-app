@@ -1,0 +1,9 @@
+2026-09-17 · Checkpoint 6
+PASS: python3 -m unittest discover -s tools/study -p 'test_*.py' -v
+10 integration tests, including 8 rotation/crop subcases.
+Real LibreOffice PPTX conversion, mask rules/redaction, no overwrite, blank/scanned pages,
+rotation/crop position preservation, visible highlight preservation.
+PASS: tree-sitter syntax parsing of 5 study Dart modules, Dart test file and AppDelegate.swift.
+Syntax parsing is NOT Dart/Swift type checking or a native build.
+Flutter: 9 tests written in test/study/cloze_test.dart, NOT RUN.
+NOT RUN: flutter analyze, flutter test, Xcode build, simulator/device tests, signing, IPA.

@@ -1,0 +1,74 @@
+name: Build Study iOS
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: study-ios-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+        working-directory: source
+    steps:
+      - name: Checkout study changes
+        uses: actions/checkout@v7
+        with:
+          path: study
+          persist-credentials: false
+      - name: Checkout pinned Saber source
+        uses: actions/checkout@v7
+        with:
+          repository: saber-notes/saber
+          ref: 5b396a40406c75835741f5c4555bc10ae816f121
+          path: source
+          persist-credentials: false
+      - name: Apply study changes
+        run: cp -R ../study/overlay/. .
+      - name: Set up pinned Flutter SDK
+        run: |
+          set -euo pipefail
+          git submodule update --init --depth 1 submodules/flutter
+          git -C submodules/flutter switch -C stable
+          flutter_revision=$(git -C submodules/flutter rev-parse HEAD)
+          flutter_tag=$(git -C submodules/flutter ls-remote --tags origin | awk -v c="$flutter_revision" '$1 == c {sub(/refs\/tags\//, "", $2); print $2}')
+          if [ -n "$flutter_tag" ]; then
+            git -C submodules/flutter tag -f "$flutter_tag"
+          fi
+          echo "$PWD/submodules/flutter/bin" >> "$GITHUB_PATH"
+      - name: Record toolchain
+        run: |
+          flutter --version
+          xcodebuild -version
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Analyze study modules
+        run: flutter analyze lib/data/study lib/components/study
+      - name: Run study tests
+        run: flutter test test/study
+      - name: Build unsigned iOS app
+        run: flutter build ios --release --no-codesign
+      - name: Package unsigned app
+        run: |
+          set -euo pipefail
+          test -d build/ios/iphoneos/Runner.app
+          mkdir -p build/study/Payload
+          ditto build/ios/iphoneos/Runner.app build/study/Payload/Runner.app
+          cd build/study
+          ditto -c -k --keepParent Payload Study-UNSIGNED.ipa
+          shasum -a 256 Study-UNSIGNED.ipa > SHA256.txt
+          printf '%s\n' 'Unsigned: must be signed before installation on iPhone.' > INSTALL-NOTE.txt
+      - name: Upload unsigned build
+        uses: actions/upload-artifact@v7
+        with:
+          name: Study-unsigned-iOS-app
+          path: |
+            source/build/study/Study-UNSIGNED.ipa
+            source/build/study/SHA256.txt
+            source/build/study/INSTALL-NOTE.txt
+          if-no-files-found: error
+          retention-days: 14
