@@ -1,24 +1,17 @@
 # Study App · 苹果学习软件
 
-iPhone 优先，兼顾 iPad。基于 Saber 的学习版开发源码。
+面向 iPhone，兼顾 iPad。基于 [Saber](https://github.com/saber-notes/saber) 的固定版本开发，保留 GPL-3.0 许可及上游版权声明。
 
-## 当前状态
+## 当前可下载版本
 
-GitHub 仓库访问已接通；代码以固定上游源码 + overlay 改动保存。
-这不是安装包，苹果编译、签名、真机验收尚未完成。
+[2026-09-28 云端构建](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/36362400239) 已通过 Flutter 学习模块静态分析、9 项测试和 Xcode 无签名 iOS 构建。Artifacts 中的 `Study-unsigned-iOS-app` 含 `Study-UNSIGNED.ipa`。该 IPA 需要使用个人 Apple 账号签名才能在 iPhone 安装；它尚未经真机验收，也不是功能完整的正式版。
 
-## 第一次构建
+- Windows + iPhone 自用安装：[INSTALL_WINDOWS.md](INSTALL_WINDOWS.md)。
+- 稳定测试与正式交付路径、功能缺口：[RELEASE_OPTIONS.md](RELEASE_OPTIONS.md)。
+- 可核对的构建证据：[BUILD_PROGRESS.md](BUILD_PROGRESS.md)。
 
-进入 Actions → Build Study iOS → Run workflow → main → Run workflow。
-构建会下载固定版本的 Saber 和 Flutter，覆盖学习功能代码，执行检查和测试，再构建无签名 iOS 文件。
-成功后下载 Study-unsigned-iOS-app 产物。Study-UNSIGNED.ipa 仍需签名，不能直接安装。
+## 源码与构建
 
-## 源码结构
+`BASE_COMMIT.txt` 固定上游 Saber 版本；`overlay/` 保存学习功能改动；`.github/workflows/study-ios.yml` 在 macOS runner 上恢复固定上游源码、覆盖改动、测试并构建无签名 IPA。修改 overlay 或工作流并推送 main 会重新构建，也可以在 Actions 手动运行。
 
-- BASE_COMMIT.txt：Saber 固定版本。
-- overlay/：全部学习功能改动与阶段进度。
-- .github/workflows/study-ios.yml：本仓库的唯一构建工作流。
-- overlay/STUDY_PROGRESS.md：功能、测试结果及未完成事项（历史检查点）。
-
-工作流先恢复 https://github.com/saber-notes/saber 的固定版本，再覆盖 overlay 文件。原版的自动发布任务不会成为本仓库的任务。
-保留 GPL-3.0 许可及上游版权声明。
+保留原始教材文件并备份笔记。当前手机端优先验证 PDF 学习流程；PPTX 需要先在电脑转换为 PDF。更完整的需求和限制见上述交付说明。

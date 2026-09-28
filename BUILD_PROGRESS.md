@@ -1,16 +1,11 @@
 # 云端构建进度
 
-2026-09-17
+2026-09-17：第一次运行 35235644496 完成环境和依赖安装；发现并修复 PlatformFile.bytes API 问题与代码规范提示。
 
-第一次运行 35235644496 已完成环境搭建与依赖安装。Flutter 3.47.4、Dart 3.13.3、Xcode 26.6。
-静态分析发现 PlatformFile.bytes 接口不存在，已改为插件支持的 readAsBytes()。同时按日志修复 28 项代码规范提示。
-本次提交尚待云端重新验证。测试、iOS 编译、签名和真机验证尚未完成。
-工作流增加仅 main 分支学习源码/构建配置改动触发，便于后续修复后自动检查，不需要反复手动启动。
+2026-09-28：第二次运行 36362081827，Flutter 分析通过，9 项测试 8 项通过；修正矩形浮点数严格相等断言。
 
-2026-09-28 第二次运行 36362081827：Flutter 学习模块静态分析通过；9 项测试中 8 项通过。唯一失败为矩形浮点数的严格相等断言，已改为误差小于百万分之一的坐标比较；苹果编译还未执行，等待下一轮。
+2026-09-28：第三次运行 [36362400239](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/36362400239)，学习模块分析成功、9/9 测试通过、Xcode 无签名 iOS 构建成功（Runner.app 52.7 MB）。Artifact 10946217962 含 22,250,648 字节 IPA 和 SHA256 清单，保留截至 2026-10-12。IPA SHA256：`446848005b6c5c678d7d21dfac8f63cfc2b5e606ed7748b8f27260f7fa806571`。实测 Info.plist：Bundle ID `com.adilhanney.saber`、显示名 Saber、最低 iOS 15.0；无 embedded.mobileprovision。
 
-2026-09-28 第三次运行 36362400239：Flutter 静态分析成功；9/9 学习测试通过；Xcode 无签名构建成功（Runner.app 52.7 MB）；归档上传成功。
-云端产物 artifact 10946217962：Study-unsigned-iOS-app.zip，包含 22,250,648 字节 IPA 和 SHA256 清单；期限截至 2026-10-12。
-SHA256：446848005b6c5c678d7d21dfac8f63cfc2b5e606ed7748b8f27260f7fa806571。已下载核验 zip、IPA、清单，Info.plist：Bundle ID com.adilhanney.saber，显示名 Saber，最低 iOS 15.0；没有 embedded.mobileprovision。
-安装到真机还需签名。未经真机运行和核心学习流程验收；手机内 PPTX 转换仍未完成。
-GitHub 构建记录：https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/36362400239
+2026-09-28：核查苹果、Flutter、GitHub Actions、Sideloadly 正式文档，形成 [两条安装路线和首版验收](RELEASE_OPTIONS.md)。免费个人账号可通过 Windows 工具签名自用测试，7 天内重签；长期 TestFlight 需要用户开发者会员、App ID 和签名材料。Notion 连接中未找到该项目已有文档。仓库为开发进度来源。
+
+待办：在目标 iPhone 实测安装、PDF 导入/挖空/批注/保存/朗读/导出；实现手机端 PPTX/其他文档处理及扫描件 OCR；正式命名和唯一 Bundle ID；如走 TestFlight，配置用户本人开发者账号与签名。当前无真机运行证据，不能认定完整版本已完成。
