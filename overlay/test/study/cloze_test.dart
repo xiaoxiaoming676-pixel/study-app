@@ -14,8 +14,11 @@ void main() {
     expect(restored.hidden, false);
     expect(restored.text, original.text);
     expect(restored.masks.single.answer, '教材答案');
-    expect(restored.masks.single.onPage(const Size(1000, 1400)),
-        const Rect.fromLTWH(100, 280, 300, 140));
+    final bounds = restored.masks.single.onPage(const Size(1000, 1400));
+    expect(bounds.left, closeTo(100, 1e-6));
+    expect(bounds.top, closeTo(280, 1e-6));
+    expect(bounds.width, closeTo(300, 1e-6));
+    expect(bounds.height, closeTo(140, 1e-6));
   });
   test('Export page clone retains masks; preview can omit them without mutation', () {
     final page = EditorPage(cloze: ClozeState(masks: [
