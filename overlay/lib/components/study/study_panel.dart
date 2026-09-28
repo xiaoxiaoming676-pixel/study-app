@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:crypto/crypto.dart';
@@ -18,7 +17,7 @@ import 'package:saber/data/study/cloze.dart';
 import 'package:saber/data/study/study_exporter.dart';
 
 class StudyPanel extends StatefulWidget {
-  const StudyPanel({super.key, required this.coreInfo, required this.pageIndex,
+  const new({super.key, required this.coreInfo, required this.pageIndex,
     required this.onChanged});
   final EditorCoreInfo coreInfo;
   final int pageIndex;
@@ -31,24 +30,24 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
   static const _channel = MethodChannel('study.local/pdf_speech');
   late final Map<int, ClozeState> _states;
   late int _page;
-  int _tab = 0;
-  int _previewGeneration = 0;
-  int _revision = 0;
+  var _tab = 0;
+  var _previewGeneration = 0;
+  var _revision = 0;
   Uint8List? _preview;
   String? _error;
-  String _operation = '';
-  bool _busy = false;
-  bool _saving = false;
-  bool _dirty = false;
-  bool _delete = false;
-  bool _showOriginal = false;
-  bool _reading = false;
-  bool _continuous = false;
-  int _speechToken = 0;
-  int _speechOffset = 0;
-  int _speechStartOffset = 0;
+  var _operation = '';
+  var _busy = false;
+  var _saving = false;
+  var _dirty = false;
+  var _delete = false;
+  var _showOriginal = false;
+  var _reading = false;
+  var _continuous = false;
+  var _speechToken = 0;
+  var _speechOffset = 0;
+  var _speechStartOffset = 0;
   String? _voice;
-  double _rate = 0.5;
+  var _rate = 0.5;
   List<Map<String, dynamic>> _voices = [];
   Offset? _start;
   Rect? _pending;
@@ -102,7 +101,7 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
     final revision = ++_revision;
     final snapshot = Map<int, ClozeState>.from(_states);
     setState(() { _saving = true; _dirty = true; });
-    _saveQueue = _saveQueue.then((_) async {
+    return _saveQueue = _saveQueue.then((_) async {
       bool ok = false;
       try { ok = await widget.onChanged(snapshot); } catch (_) { ok = false; }
       if (mounted && revision == _revision) setState(() {
@@ -111,7 +110,6 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
       });
       return ok;
     });
-    return _saveQueue;
   }
 
   Future<void> _leave() async {
@@ -249,7 +247,7 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
   Future<void> _importRules() => _run('导入规则', () async {
     final file = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: ['json']);
     if (file == null) return;
-    final bytes = file.bytes ?? await File(file.path!).readAsBytes();
+    final bytes = await file.readAsBytes();
     if (bytes.length > 20 * 1024 * 1024) throw const FormatException('规则文件过大，请按章节处理。');
     final manifest = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
     if (manifest['schema'] != 'saber-study/1') throw const FormatException('不是教材规则文件。');

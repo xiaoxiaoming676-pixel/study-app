@@ -3,7 +3,7 @@ import 'package:saber/components/study/answer_painter.dart';
 import 'package:saber/data/study/cloze.dart';
 
 class AnswerSheet extends StatefulWidget {
-  const AnswerSheet({super.key, required this.initial, required this.answer,
+  const new({super.key, required this.initial, required this.answer,
     required this.onChanged});
   final StudyResponse initial;
   final String answer;
@@ -15,7 +15,7 @@ class _AnswerSheetState extends State<AnswerSheet> {
   late final TextEditingController _text;
   late List<List<Offset>> _ink;
   List<Offset>? _current;
-  bool _showAnswer = false;
+  var _showAnswer = false;
   @override
   void initState() { super.initState(); _text = TextEditingController(text: widget.initial.text);
     _ink = widget.initial.ink.map((line) => line.toList()).toList(); }
@@ -44,7 +44,7 @@ class _AnswerSheetState extends State<AnswerSheet> {
           onPanEnd: (_) => _finish(), onPanCancel: _finish,
           child: DecoratedBox(decoration: BoxDecoration(color: const Color(0xFFF4F7F6),
             border: Border.all(color: Colors.teal.shade100), borderRadius: BorderRadius.circular(12)),
-            child: CustomPaint(painter: AnswerPainter(StudyResponse(ink: [..._ink, if (_current != null) _current!])))),
+            child: CustomPaint(painter: AnswerPainter(StudyResponse(ink: [..._ink, ?_current])))),
         ));
       }),
       Row(children: [TextButton(onPressed: _ink.isEmpty ? null : () {

@@ -1,6 +1,12 @@
 name: Build Study iOS
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'overlay/**'
+      - '.github/workflows/study-ios.yml'
+      - 'BASE_COMMIT.txt'
 permissions:
   contents: read
 concurrency:

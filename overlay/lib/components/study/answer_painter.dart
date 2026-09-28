@@ -35,7 +35,7 @@ void paintStudyResponse(Canvas canvas, Rect rect, StudyResponse response) {
 }
 
 class AnswerPainter extends CustomPainter {
-  const AnswerPainter(this.response);
+  const new(this.response);
   final StudyResponse response;
   @override
   void paint(Canvas canvas, Size size) => paintStudyResponse(canvas, Offset.zero & size, response);

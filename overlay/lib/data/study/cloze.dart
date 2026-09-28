@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 /// Normalized coordinates keep masks stable when a page is resized.
 class ClozeMask {
-  const ClozeMask(this.rect, {this.answer = ''});
+  const new(this.rect, {this.answer = ''});
   final Rect rect;
   final String answer;
   String get key => [rect.left, rect.top, rect.width, rect.height]
       .map((v) => v.toStringAsFixed(6)).join(':');
 
-  factory ClozeMask.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     final values = (json['rect'] as List).cast<num>();
     if (values.length != 4 || values.any((n) => !n.isFinite)) {
       throw const FormatException('Invalid mask coordinates');
@@ -33,7 +33,7 @@ class ClozeMask {
 
 /// Immutable state: history items must not share mutable lists.
 class ClozeState {
-  ClozeState({List<ClozeMask> masks = const [], this.hidden = true,
+  new({List<ClozeMask> masks = const [], this.hidden = true,
       this.text = '', this.note = '', Map<String, StudyResponse> responses = const {},
       this.showResponses = true, this.speechOffset = 0})
       : masks = List.unmodifiable(masks), responses = Map.unmodifiable(responses);
@@ -45,7 +45,7 @@ class ClozeState {
   final bool showResponses;
   final int speechOffset;
 
-  factory ClozeState.fromJson(Map<String, dynamic>? json) => json == null
+  factory fromJson(Map<String, dynamic>? json) => json == null
       ? ClozeState()
       : ClozeState(
           masks: (json['masks'] as List? ?? []).map((m) =>
@@ -94,11 +94,11 @@ class ClozeState {
 }
 
 class StudyResponse {
-  StudyResponse({this.text = '', List<List<Offset>> ink = const []})
+  new({this.text = '', List<List<Offset>> ink = const []})
       : ink = List.unmodifiable(ink.map((line) => List<Offset>.unmodifiable(line)));
   final String text;
   final List<List<Offset>> ink;
-  factory StudyResponse.fromJson(Map<String, dynamic> json) => StudyResponse(
+  factory fromJson(Map<String, dynamic> json) => StudyResponse(
     text: json['text'] as String? ?? '',
     ink: (json['ink'] as List? ?? []).map((line) => (line as List).map((p) {
       final xy = (p as List).cast<num>();
