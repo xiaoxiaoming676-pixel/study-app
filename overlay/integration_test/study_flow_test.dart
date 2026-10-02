@@ -1,14 +1,18 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:saber/components/canvas/canvas_gesture_detector.dart';
 import 'package:saber/components/study/study_panel.dart';
 import 'package:saber/data/editor/editor_core_info.dart';
 import 'package:saber/data/file_manager/file_manager.dart';
+import 'package:saber/data/flavor_config.dart';
 import 'package:saber/data/routes.dart';
 import 'package:saber/main.dart' as saber;
 import 'package:saber/pages/editor/editor.dart';
@@ -32,6 +36,7 @@ void main() {
     final bytes = await document.save();
     await source.writeAsBytes(bytes, flush: true);
 
+    FlavorConfig.setupFromEnvironment();
     await saber.appRunner(const []);
     await waitFor(tester, find.byType(HomePage));
     final notePath = await FileManager.newFilePath('/');
@@ -39,6 +44,19 @@ void main() {
         .push(RoutePaths.editImportPdf(notePath, source.path));
     await waitFor(tester, find.byType(Editor));
     await waitFor(tester, find.byTooltip('学习：挖空与朗读'));
+
+    // Draw through the real canvas with a stylus gesture, then reopen the file.
+    final canvas = find.byType(CanvasGestureDetector);
+    await waitFor(tester, canvas);
+    final start = tester.getRect(canvas).center;
+    final pen = await tester.startGesture(start, kind: PointerDeviceKind.stylus);
+    await pen.moveBy(const Offset(24, 12));
+    await pen.moveBy(const Offset(24, 12));
+    await pen.up();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.state<EditorState>(find.byType(Editor)).saveToFile();
+    expect((await EditorCoreInfo.loadFromFilePath(notePath)).pages.first.strokes,
+        isNotEmpty);
 
     // The native plugin must extract real PDF text and coordinates.
     const channel = MethodChannel('study.local/pdf_speech');
@@ -49,13 +67,35 @@ void main() {
     expect(analysis?['text'], contains('Alpha'));
     expect(analysis?['masks'], isNotEmpty);
 
+    // A raster-only PDF exercises Vision OCR and its page-coordinate masks.
+    final recorder = ui.PictureRecorder();
+    final rasterCanvas = Canvas(recorder);
+    rasterCanvas.drawColor(Colors.white, BlendMode.src);
+    final label = TextPainter(
+      text: const TextSpan(text: 'Alpha', style: TextStyle(fontSize: 72, color: Colors.black)),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    label.paint(rasterCanvas, const Offset(75, 75));
+    final raster = await recorder.endRecording().toImage(640, 320);
+    final rasterBytes = await raster.toByteData(format: ui.ImageByteFormat.png);
+    raster.dispose();
+    final scanned = pw.Document();
+    scanned.addPage(pw.Page(build: (_) => pw.Image(
+      pw.MemoryImage(rasterBytes!.buffer.asUint8List()))));
+    final scanResult = await channel.invokeMapMethod<String, dynamic>('analyze', {
+      'bytes': await scanned.save(), 'page': 0, 'keywords': ['Alpha'],
+      'bold': false, 'underline': false, 'highlight': false, 'color': '',
+    });
+    expect(scanResult?['text'], contains('Alpha'));
+    expect(scanResult?['masks'], isNotEmpty);
+
     await tester.tap(find.byTooltip('学习：挖空与朗读'));
     await waitFor(tester, find.byType(StudyPanel));
     await tester.tap(find.text('挖空').last);
     await waitFor(tester, find.text('自动挖空'));
     await tester.tap(find.text('自动挖空'));
     await waitFor(tester, find.text('生成候选'));
-    await tester.enterText(find.byType(TextField).last, 'Alpha');
+    await tester.enterText(find.byType(TextField).first, 'Alpha');
     await tester.tap(find.text('生成候选'));
     await waitFor(tester, find.text('保存候选'));
     await tester.tap(find.text('保存候选'));
@@ -68,6 +108,7 @@ void main() {
     await waitFor(tester, find.text('已保存'));
 
     final saved = await EditorCoreInfo.loadFromFilePath(notePath);
+    expect(saved.pages.first.strokes, isNotEmpty);
     expect(saved.pages.first.cloze.masks.single.answer, 'Alpha');
     expect(saved.pages.first.cloze.note, '这段需要复习');
 
