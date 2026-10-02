@@ -56,6 +56,17 @@ jobs:
         run: flutter analyze lib/data/study lib/components/study
       - name: Run study tests
         run: flutter test test/study
+      - name: Boot available iPhone simulator
+        run: |
+          set -euo pipefail
+          sim_id=$(xcrun simctl list devices available --json | python3 -c 'import json,sys; data=json.load(sys.stdin)["devices"]; candidates=[d for entries in data.values() for d in entries if d.get("isAvailable", True) and "iPhone" in d["name"]]; print(candidates[-1]["udid"] if candidates else "")')
+          test -n "$sim_id" || { echo 'No iPhone simulator is available on this runner'; exit 1; }
+          xcrun simctl boot "$sim_id" || true
+          xcrun simctl bootstatus "$sim_id" -b
+          echo "STUDY_SIM_ID=$sim_id" >> "$GITHUB_ENV"
+      - name: Test import, notes, save and reading on iOS simulator
+        timeout-minutes: 20
+        run: flutter test integration_test/study_flow_test.dart -d "$STUDY_SIM_ID" --reporter expanded
       - name: Build unsigned iOS app
         run: flutter build ios --release --no-codesign
       - name: Package unsigned app

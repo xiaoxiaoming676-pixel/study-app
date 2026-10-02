@@ -11,29 +11,55 @@ import workmanager_apple
   private var studyChannel: FlutterMethodChannel?
   private var studyTokens: [ObjectIdentifier: Int] = [:]
 
-  /// Recognize text in scanned PDF pages locally for reading aloud. OCR does
-  /// not guess answer regions: scans still require manual cloze selection.
-  private static func recognizeScannedPage(_ page: PDFPage, bounds: CGRect) -> String {
+  /// Recognize text locally; keyword bounds are returned in page coordinates.
+  /// Style and color guesses are left to the user's manual selection.
+  private static func recognizeScannedPage(_ page: PDFPage, bounds: CGRect,
+                                           keywords: [String]) -> (text: String, masks: [[String: Any]]) {
     let longest = max(bounds.width, bounds.height)
-    guard longest > 0 else { return "" }
+    guard longest > 0 else { return ("", []) }
     let scale = min(CGFloat(3), CGFloat(2400) / longest)
     let image = page.thumbnail(of: CGSize(width: bounds.width * scale,
       height: bounds.height * scale), for: .cropBox)
-    guard let cgImage = image.cgImage else { return "" }
+    guard let cgImage = image.cgImage else { return ("", []) }
     let request = VNRecognizeTextRequest()
     request.recognitionLevel = .accurate
     request.usesLanguageCorrection = true
     request.recognitionLanguages = ["zh-Hans", "en-US"]
     do {
       try VNImageRequestHandler(cgImage: cgImage, options: [:]).perform([request])
-    } catch { return "" }
+    } catch { return ("", []) }
     let observations = (request.results ?? []).sorted { left, right in
       if abs(left.boundingBox.midY - right.boundingBox.midY) > 0.015 {
         return left.boundingBox.midY > right.boundingBox.midY
       }
       return left.boundingBox.minX < right.boundingBox.minX
     }
-    return observations.compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+    var lines: [String] = []
+    var masks: [[String: Any]] = []
+    var seen = Set<String>()
+    for observation in observations {
+      guard let recognized = observation.topCandidates(1).first else { continue }
+      lines.append(recognized.string)
+      for keyword in keywords where !keyword.isEmpty {
+        var cursor = recognized.string.startIndex
+        while cursor < recognized.string.endIndex,
+              let match = recognized.string.range(of: keyword,
+                range: cursor..<recognized.string.endIndex) {
+          if let location = try? recognized.boundingBox(for: match) {
+            let box = location.boundingBox.intersection(CGRect(x: 0, y: 0, width: 1, height: 1))
+            if !box.isNull && box.width > 0 && box.height > 0 {
+              let key = String(format: "%.3f:%.3f:%.3f:%.3f", box.minX, box.minY, box.width, box.height)
+              if seen.insert(key).inserted {
+                masks.append(["rect": [box.minX, 1 - box.maxY, box.width, box.height],
+                              "answer": String(recognized.string[match])])
+              }
+            }
+          }
+          cursor = match.upperBound
+        }
+      }
+    }
+    return (lines.joined(separator: "\n"), masks)
   }
 
   func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer,
@@ -125,9 +151,10 @@ import workmanager_apple
             DispatchQueue.main.async { result(FlutterError(code: "GEOMETRY", message: "旋转或裁切 PDF 请使用手动框选，或先规范化页面", details: nil)) }; return
           }
           let extractedText = page.string ?? ""
-          let text = extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            ? Self.recognizeScannedPage(page, bounds: bounds) : extractedText
-          var masks: [[String: Any]] = []
+          let scan = extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? Self.recognizeScannedPage(page, bounds: bounds, keywords: keywords) : (text: "", masks: [[String: Any]]())
+          let text = scan.text.isEmpty ? extractedText : scan.text
+          var masks: [[String: Any]] = scan.masks
           var seen = Set<String>()
           func addSelection(_ selection: PDFSelection, answer: String) {
             for line in selection.selectionsByLine() {
