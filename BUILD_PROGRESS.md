@@ -9,3 +9,5 @@
 2026-09-28：核查苹果、Flutter、GitHub Actions、Sideloadly 正式文档，形成 [两条安装路线和首版验收](RELEASE_OPTIONS.md)。免费个人账号可通过 Windows 工具签名自用测试，7 天内重签；长期 TestFlight 需要用户开发者会员、App ID 和签名材料。Notion 连接中未找到该项目已有文档。仓库为开发进度来源。
 
 待办：在目标 iPhone 实测安装、PDF 导入/挖空/批注/保存/朗读/导出；实现手机端 PPTX/其他文档处理及扫描件 OCR；正式命名和唯一 Bundle ID；如走 TestFlight，配置用户本人开发者账号与签名。当前无真机运行证据，不能认定完整版本已完成。
+
+2026-10-02：加入 iOS Vision 本地扫描 PDF 文字识别供朗读；扫描页自动挖空仍需手动框选。新增无电脑安装路线核查 PHONE_ONLY.md；云端编译和真机结果待验证。

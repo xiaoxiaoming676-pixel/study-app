@@ -2,6 +2,7 @@ import Flutter
 import UIKit
 import AVFoundation
 import PDFKit
+import Vision
 import workmanager_apple
 
 @main
@@ -9,6 +10,31 @@ import workmanager_apple
   private let studySpeech = AVSpeechSynthesizer()
   private var studyChannel: FlutterMethodChannel?
   private var studyTokens: [ObjectIdentifier: Int] = [:]
+
+  /// Recognize text in scanned PDF pages locally for reading aloud. OCR does
+  /// not guess answer regions: scans still require manual cloze selection.
+  private static func recognizeScannedPage(_ page: PDFPage, bounds: CGRect) -> String {
+    let longest = max(bounds.width, bounds.height)
+    guard longest > 0 else { return "" }
+    let scale = min(CGFloat(3), CGFloat(2400) / longest)
+    let image = page.thumbnail(of: CGSize(width: bounds.width * scale,
+      height: bounds.height * scale), for: .cropBox)
+    guard let cgImage = image.cgImage else { return "" }
+    let request = VNRecognizeTextRequest()
+    request.recognitionLevel = .accurate
+    request.usesLanguageCorrection = true
+    request.recognitionLanguages = ["zh-Hans", "en-US"]
+    do {
+      try VNImageRequestHandler(cgImage: cgImage, options: [:]).perform([request])
+    } catch { return "" }
+    let observations = (request.results ?? []).sorted { left, right in
+      if abs(left.boundingBox.midY - right.boundingBox.midY) > 0.015 {
+        return left.boundingBox.midY > right.boundingBox.midY
+      }
+      return left.boundingBox.minX < right.boundingBox.minX
+    }
+    return observations.compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+  }
 
   func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer,
                         willSpeakRangeOfSpeechString characterRange: NSRange,
@@ -98,7 +124,9 @@ import workmanager_apple
                 page.bounds(for: .mediaBox) == bounds else {
             DispatchQueue.main.async { result(FlutterError(code: "GEOMETRY", message: "旋转或裁切 PDF 请使用手动框选，或先规范化页面", details: nil)) }; return
           }
-          let text = page.string ?? ""
+          let extractedText = page.string ?? ""
+          let text = extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? Self.recognizeScannedPage(page, bounds: bounds) : extractedText
           var masks: [[String: Any]] = []
           var seen = Set<String>()
           func addSelection(_ selection: PDFSelection, answer: String) {

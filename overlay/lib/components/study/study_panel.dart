@@ -319,7 +319,7 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
         if (!mounted) return;
         await _persist({index: _states[index]!.copyWith(text: text)});
       }
-      if (text.trim().isEmpty) throw const FormatException('未提取到文字，扫描件请先进行文字识别。');
+      if (text.trim().isEmpty) throw const FormatException('本页未识别到文字。请检查扫描清晰度，或使用手动框选。');
       if (_state.hidden && _state.masks.isNotEmpty) {
         if (_state.masks.any((m) => m.answer.isEmpty)) {
           throw const FormatException('本页有手动挖空，为避免读出答案，请先切换为原文学习。');
