@@ -4,11 +4,12 @@
 
 ## 当前可下载版本
 
-[2026-09-28 云端构建](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/36362400239) 已通过 Flutter 学习模块静态分析、9 项测试和 Xcode 无签名 iOS 构建。Artifacts 中的 `Study-unsigned-iOS-app` 含 `Study-UNSIGNED.ipa`。该 IPA 需要使用个人 Apple 账号签名才能在 iPhone 安装；它尚未经真机验收，也不是功能完整的正式版。
+[2026-10-02 云端构建](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/36944871735) 已通过 Flutter 学习模块静态分析、9 项测试和 Xcode 无签名 iOS 构建；增加扫描 PDF 本地文字识别供朗读（尚未真机验收）。Artifacts 中的 `Study-unsigned-iOS-app` 含 `Study-UNSIGNED.ipa`。该 IPA 需要使用个人 Apple 账号签名才能在 iPhone 安装；它尚未经真机验收，也不是功能完整的正式版。
 
 - Windows + iPhone 自用安装：[INSTALL_WINDOWS.md](INSTALL_WINDOWS.md)。
 - 稳定测试与正式交付路径、功能缺口：[RELEASE_OPTIONS.md](RELEASE_OPTIONS.md)。
 - 可核对的构建证据：[BUILD_PROGRESS.md](BUILD_PROGRESS.md)。
+- 暂时没有电脑时的实际限制与 iPhone 文档转换：[PHONE_ONLY.md](PHONE_ONLY.md)。
 
 ## 源码与构建
 

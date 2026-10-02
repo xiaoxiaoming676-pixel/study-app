@@ -11,3 +11,5 @@
 待办：在目标 iPhone 实测安装、PDF 导入/挖空/批注/保存/朗读/导出；实现手机端 PPTX/其他文档处理及扫描件 OCR；正式命名和唯一 Bundle ID；如走 TestFlight，配置用户本人开发者账号与签名。当前无真机运行证据，不能认定完整版本已完成。
 
 2026-10-02：加入 iOS Vision 本地扫描 PDF 文字识别供朗读；扫描页自动挖空仍需手动框选。新增无电脑安装路线核查 PHONE_ONLY.md；云端编译和真机结果待验证。
+
+2026-10-02：[云端运行 36944871735](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/36944871735) 已完成，Flutter 学习模块静态分析无问题，9/9 学习测试通过，Xcode 无签名 iOS 构建成功（Runner.app 52.7 MB）。Artifact 11202060825 截至 2026-10-16；IPA 22,257,845 字节，SHA256 `22ec9175f2af4addbf09516f550b9e12cbac6fde47e90142c3f2b55870d82f06`。Info.plist 仍为 Saber / com.adilhanney.saber / iOS 15.0，无 embedded.mobileprovision。已下载并校验 IPA，扫描件 OCR 仅编译通过，尚未真机实测。文件另存为 Study-v0.2-UNSIGNED.ipa。
