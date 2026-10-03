@@ -171,14 +171,13 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
     if (!mounted) return;
     bool whole = false, bold = false, underline = false, highlight = false;
     String color = '';
-    final colors = TextEditingController();
     final apply = await showModalBottomSheet<bool>(context: context, isScrollControlled: true,
       builder: (context) => StatefulBuilder(builder: (context, update) => SafeArea(child: Padding(
         padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.viewInsetsOf(context).bottom + 16),
         child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
           const Text('自动挖空', style: TextStyle(fontSize: 20)),
           TextField(controller: _keyword, decoration: const InputDecoration(labelText: '关键词（每行一个）'), maxLines: 3),
-          TextField(controller: colors, decoration: const InputDecoration(labelText: '字体颜色（可选）', hintText: '例如 FF0000，不限红色'), onChanged: (v) { color = v; }),
+          TextField(decoration: const InputDecoration(labelText: '字体颜色（可选）', hintText: '例如 FF0000，不限红色'), onChanged: (v) { color = v; }),
           CheckboxListTile(title: const Text('加粗'), value: bold, onChanged: (v) => update(() { bold = v!; })),
           CheckboxListTile(title: const Text('下划线'), value: underline, onChanged: (v) => update(() { underline = v!; })),
           CheckboxListTile(title: const Text('PDF 高亮批注'), value: highlight, onChanged: (v) => update(() { highlight = v!; })),
@@ -187,7 +186,6 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
           FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('生成候选')),
         ])),
       ))));
-    colors.dispose();
     if (apply != true || !mounted) return;
     color = color.trim().replaceFirst('#', '').toUpperCase();
     final words = _keyword.text.split('\n').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
@@ -288,17 +286,15 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
 
   Future<void> _note() async {
     final index = _page;
-    final controller = TextEditingController(text: _state.note);
     await showModalBottomSheet<void>(context: context, isScrollControlled: true,
       builder: (context) => SafeArea(child: Padding(
         padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.viewInsetsOf(context).bottom + 16),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           const Text('本页长期笔记'),
-          TextField(controller: controller, minLines: 3, maxLines: 8, autofocus: true,
+          TextFormField(initialValue: _state.note, minLines: 3, maxLines: 8, autofocus: true,
             onChanged: (text) => _persist({index: _states[index]!.copyWith(note: text)})),
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('完成')),
         ]))));
-    controller.dispose();
   }
 
   Future<void> _export(StudyExportMode mode) => _run('正在导出', () async {

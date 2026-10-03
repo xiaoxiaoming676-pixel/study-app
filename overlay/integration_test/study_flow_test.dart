@@ -112,6 +112,14 @@ void main() {
     await waitFor(tester, find.text('保存候选'));
     await tester.tap(find.text('保存候选'));
     await waitFor(tester, find.textContaining('0 / 1 已答'));
+    for (var i = 0; i < 240; i++) {
+      await tester.pump(const Duration(milliseconds: 500));
+      final buttons = find.byTooltip('长期笔记');
+      if (buttons.evaluate().isNotEmpty &&
+          tester.widget<IconButton>(buttons).onPressed != null) break;
+    }
+    expect(tester.widget<IconButton>(find.byTooltip('长期笔记')).onPressed,
+        isNotNull);
 
     await tester.tap(find.byTooltip('长期笔记'));
     await waitFor(tester, find.text('本页长期笔记'));
