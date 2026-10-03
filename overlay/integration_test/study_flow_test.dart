@@ -14,6 +14,7 @@ import 'package:saber/data/editor/editor_core_info.dart';
 import 'package:saber/data/file_manager/file_manager.dart';
 import 'package:saber/data/flavor_config.dart';
 import 'package:saber/data/routes.dart';
+import 'package:saber/data/sentry/sentry_init.dart';
 import 'package:saber/main.dart' as saber;
 import 'package:saber/pages/editor/editor.dart';
 import 'package:saber/pages/home/home.dart';
@@ -37,6 +38,7 @@ void main() {
     await source.writeAsBytes(bytes, flush: true);
 
     FlavorConfig.setupFromEnvironment();
+    disableSentryForTesting();
     await saber.appRunner(const []);
     await waitFor(tester, find.byType(HomePage));
     final notePath = await FileManager.newFilePath('/');

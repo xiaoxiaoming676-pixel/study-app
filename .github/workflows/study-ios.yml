@@ -65,6 +65,8 @@ jobs:
           xcrun simctl bootstatus "$sim_id" -b
           echo "STUDY_SIM_ID=$sim_id" >> "$GITHUB_ENV"
       - name: Test import, notes, save and reading on iOS simulator
+        id: flow
+        continue-on-error: true
         timeout-minutes: 20
         run: flutter test integration_test/study_flow_test.dart -d "$STUDY_SIM_ID" --reporter expanded
       - name: Build unsigned iOS app
@@ -89,3 +91,6 @@ jobs:
             source/build/study/INSTALL-NOTE.txt
           if-no-files-found: error
           retention-days: 14
+      - name: Enforce simulator test result
+        if: steps.flow.outcome != 'success'
+        run: exit 1
