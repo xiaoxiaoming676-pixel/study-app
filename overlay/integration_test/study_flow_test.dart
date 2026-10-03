@@ -8,11 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:saber/components/canvas/canvas_gesture_detector.dart';
 import 'package:saber/components/study/study_panel.dart';
 import 'package:saber/data/editor/editor_core_info.dart';
 import 'package:saber/data/file_manager/file_manager.dart';
 import 'package:saber/data/flavor_config.dart';
+import 'package:saber/data/prefs.dart';
 import 'package:saber/data/routes.dart';
 import 'package:saber/data/sentry/sentry_init.dart';
 import 'package:saber/main.dart' as saber;
@@ -47,16 +47,26 @@ void main() {
     await waitFor(tester, find.byType(Editor));
     await waitFor(tester, find.byTooltip('学习：挖空与朗读'));
 
-    // Draw through the real canvas with a stylus gesture, then reopen the file.
-    final canvas = find.byType(CanvasGestureDetector);
-    await waitFor(tester, canvas);
-    final start = tester.getRect(canvas).center;
-    final pen = await tester.startGesture(start, kind: PointerDeviceKind.stylus);
+    // iPhone handwriting uses a finger on the imported PDF page.
+    final editor = tester.state<EditorState>(find.byType(Editor));
+    stows.editorFingerDrawing.value = true;
+    for (var i = 0; i < 40 && editor.coreInfo.pages.first.renderBox == null; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    final pageBox = editor.coreInfo.pages.first.renderBox!;
+    final start = pageBox.localToGlobal(
+      Offset(pageBox.size.width * 0.5, pageBox.size.height * 0.5));
+    final pen = await tester.startGesture(start, kind: PointerDeviceKind.touch);
+    await tester.pump(const Duration(milliseconds: 50));
     await pen.moveBy(const Offset(24, 12));
+    await tester.pump(const Duration(milliseconds: 50));
     await pen.moveBy(const Offset(24, 12));
+    await tester.pump(const Duration(milliseconds: 50));
     await pen.up();
     await tester.pump(const Duration(milliseconds: 400));
-    await tester.state<EditorState>(find.byType(Editor)).saveToFile();
+    expect(editor.coreInfo.pages.first.strokes, isNotEmpty,
+        reason: 'The imported PDF canvas did not accept a finger stroke');
+    await editor.saveToFile();
     expect((await EditorCoreInfo.loadFromFilePath(notePath)).pages.first.strokes,
         isNotEmpty);
 
