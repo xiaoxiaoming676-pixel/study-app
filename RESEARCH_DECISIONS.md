@@ -17,3 +17,17 @@
 ## 选择
 
 继续基于 Saber 开发，并保留 PDF、笔迹和离线文件引擎。先完成 iPhone 模拟器端到端流程，再做有证书的真机验收。PPTX 处理首选在 iPhone Keynote 转为 PDF；若要求 App 内一步完成，新增受控 LibreOffice 转换服务是较稳妥的工程方向，需要实际部署资源。对于机密教材，客户端应明确提示上传目的并提供删除策略。本仓库现阶段没有可用于该服务的运行主机或苹果分发签名。
+
+## 开源维护快照（2026-10-03）
+
+Star 和近期推送只说明社区规模与维护迹象，不等于转换准确率或真机可用性。
+
+| 项目 | Star / Fork | 最近推送 | 许可证 | 部署与可复用功能 | 决策 |
+| --- | ---: | --- | --- | --- | --- |
+| [Saber](https://github.com/saber-notes/saber) | 4,871 / 382 | 2026-10-02 | GPL-3.0 | Flutter + Xcode，构建依赖多；复用 PDF 导入、笔迹、持久化、多页和导出。 | 继续二次开发，社区活跃；发布二进制时按 GPLv3 提供相应源码与许可信息。 |
+| [pptx-renderer](https://github.com/aiden0z/pptx-renderer) | 124 / 33 | 2026-09-23 | Apache-2.0 | TypeScript 浏览器渲染，接入 WKWebView 与导出 PDF 仍需开发；版式覆盖待实测。 | 暂不作为高保真 PPTX 核心。 |
+| [unoserver](https://github.com/unoconv/unoserver) | 938 / 105 | 2026-06-10 | MIT | Python + LibreOffice 后端，可复用文档转 PDF；需要服务器、队列、文件大小限制与隐私策略。 | 将来做 App 内一键 PPTX 时首选验证。 |
+| [libreoffice-unoserver Docker](https://github.com/libreofficedocker/libreoffice-unoserver) | 32 / 13 | 2025-08-18 | Apache-2.0 | 容器部署省去本地安装，但维护较慢，仍需持续运行主机。 | 仅作容器参考。 |
+| [libre-convert](https://github.com/Rhgx/libre-convert) | 1 / 1 | 2026-03-13 | 仓库元数据未标明 | 社区极小，需自行核对代码、许可证和稳定性。 | 不依赖。 |
+
+Saber 的 GPL-3.0 是分发约束；目前私有仓库存放叠加补丁，若向他人分发完整 App，应按许可证条款准备对应版本的完整源码及告知方式。参考 [GNU GPLv3 第 6 节](https://www.gnu.org/licenses/gpl-3.0.en.html)。
