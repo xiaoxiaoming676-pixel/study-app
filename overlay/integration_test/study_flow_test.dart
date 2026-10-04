@@ -108,6 +108,8 @@ void main() {
     await tester.tap(find.text('自动挖空'));
     await waitFor(tester, find.text('生成候选'));
     await tester.enterText(find.byType(TextField).first, 'Alpha');
+    await tester.testTextInput.hide();
+    await tester.pump(const Duration(milliseconds: 350));
     await tester.tap(find.text('生成候选'));
     await waitFor(tester, find.text('保存候选'));
     await tester.tap(find.text('保存候选'));

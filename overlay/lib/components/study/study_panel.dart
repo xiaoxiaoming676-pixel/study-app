@@ -183,7 +183,7 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
           CheckboxListTile(title: const Text('PDF 高亮批注'), value: highlight, onChanged: (v) => update(() { highlight = v!; })),
           SwitchListTile(title: const Text('应用到整本教材'), value: whole, onChanged: (v) => update(() { whole = v; })),
           const Text('任一条件匹配即列为候选。先预览，再保存；图片中的标记需要人工框选。'),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('生成候选')),
+          FilledButton(onPressed: () { FocusScope.of(context).unfocus(); Navigator.pop(context, true); }, child: const Text('生成候选')),
         ])),
       ))));
     if (apply != true || !mounted) return;
