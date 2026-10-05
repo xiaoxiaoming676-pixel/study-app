@@ -84,3 +84,4 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 2026-10-06 正在验证扫描页下划线候选：在 OCR 文字框下缘附近寻找跨越大部分文字宽度的深色横线；合成样本要求选中带横线的 Beta，排除无横线的 Alpha。候选仍需人工确认，代码尚待 iPhone、iPad 模拟器编译和业务回归。
 
 2026-10-06 [下划线 iOS 运行 37368501535](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37368501535) 与 [Windows 运行 37368501599](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37368501599) 已触发，但截至 2026-10-06 04:19 北京时间仍在排队、尚未分配运行器。[GitHub 官方状态页](https://www.githubstatus.com/) 同时报告 Actions 托管运行器分配延迟，不能把排队视为代码编译失败。新增研究确认 office-kit/pptx 自称预览不具像素精确性，900Slides 是桌面工具；二者尚不能证明手机内可靠 PPTX 转换，细节见 `PPTX_EVALUATION.md`。最后已验证版本仍为运行 37345346944。
+2026-10-06 约 04:30 北京时间，上述 iOS 与 Windows 作业均在等待约 15 分钟后显示整体失败；各自唯一作业为 `cancelled`，`steps=null`、无运行器日志，未进行编译或业务测试。GitHub 状态页当时仍报告 Actions 托管运行器分配延迟。下划线识别提交 `7281401e54badcee1a9eaa81fd8ce20e15286d13` 仍待云端验证，不能归入绿色版本。已另在 Windows 用三页合成 PPTX 核对浏览器离线渲染原型与 PowerPoint PDF：基本画面接近，但中文 PDF 文字提取出现乱码，图表有可见差异；细节及尚未满足的 iOS 验收条件见 `PPTX_EVALUATION.md`。

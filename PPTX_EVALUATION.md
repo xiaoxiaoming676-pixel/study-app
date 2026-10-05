@@ -11,9 +11,15 @@
 | [offline_document_viewer](https://github.com/huseyiniriss/offline_document_viewer) | 内置 PPTXjs 的离线 Flutter 预览，文档说明对图表和自动缩字有限制；未提供导出可直接用于本 App 的逐页 PDF API。 | 可以研究预览适配，先用真实课件核对清晰度、性能与 PDF 导出，再考虑接入。 |
 | [Pagus](https://github.com/pagus-kit/Pagus) + WebKit | 可在浏览器内把 PPTX 解析为 SVG/DOM；[WKWebView.createPDF](https://developer.apple.com/documentation/webkit/wkwebview/createpdf%28configuration%3Acompletionhandler%3A%29)可导出网页 PDF。Pagus 使用 `<foreignObject>` 和字体替换，复杂公式及版式需要实测。 | 有希望形成离线转换原型，但目前尚未验证多页纸张尺寸、文字可选性、字体、公式与内存；不可直接称为高保真导入。 |
 | [office-kit/pptx](https://github.com/office-kit/pptx) 浏览器预览 | 能读 PPTX 并用伴随预览包输出 SVG/PNG；项目自己的说明明确其预览并非像素精确，建议印刷级输出使用 PowerPoint 或 LibreOffice。尚无本 App 所需的离线多页 PDF 与坐标验收。 | 可作为离线原型候选，不直接替换现有教材导入。 |
+| [aiden0z/pptx-renderer](https://github.com/aiden0z/pptx-renderer) 浏览器渲染 | Apache-2.0；提供可随 App 打包的浏览器 ESM 文件、ZIP 限制、逐页 HTML/SVG 和 PowerPoint 对照测试。项目明确列出尚未支持的 3D、动画、部分公式及 EMF/WMF；文档没有现成的 iOS 逐页 PDF 导出和本 App 的坐标映射验收。 | 最值得继续做离线原型的候选：需在 WKWebView 中逐页渲染，再验证 PDF 导出、字体、页数、坐标和内存，不能仅凭项目截图宣称可用。 |
+| [docMentis udoc-viewer](https://github.com/docMentis/docmentis-udoc-viewer) WASM 预览 | 声称浏览器内支持 PPTX；核心 WASM 是私有源码和单独授权，默认每次打开文档发送匿名遥测，关闭遥测需特定许可。文档没有适配本 App 的逐页 PDF 导出。 | 当前不接入隐私敏感的离线教材路径；如将来评估，先核对许可、遥测和可导出能力。 |
 | [900Slides](https://github.com/900Labs/900Slides) 桌面工具 | 文档称可在桌面本地把 PPTX 导出 PDF，也明确各平台安装和发布产物仍需验证；不是 iOS 应用内的转换组件。 | 对没有 PowerPoint 的电脑可另行评估；本机已有 PowerPoint 转换路径，不改变手机端结论。 |
 | Microsoft OneDrive / Graph 转换 | [Microsoft Graph](https://learn.microsoft.com/en-us/graph/api/driveitem-get-content-format?view=graph-rest-beta)列出 PPTX → PDF；需要先把用户文件放到其云端并完成账号授权。 | 用户未选择云端教材存储，不主动上传私有教材。 |
 | LibreOffice / unoserver | 可在持续运行的服务端转换；本仓库无经授权的文档服务和存储策略。 | 若将来选择云端路线，须先确定主机、成本、上传同意、保留/删除策略，再做应用接入。 |
+
+## Windows 离线原型核对（2026-10-06）
+
+用本机 PowerPoint 16 生成的三页无敏感样本，分别包含中文红字与矩形、英文文本、中文柱状图。`@aiden0z/pptx-renderer` 1.3.0 在本机 Edge 浏览器离线加载样本并正确报告三页；逐页渲染后由浏览器打印为每页一张 PDF。对照 PowerPoint 导出的 960×540 图片，三页平均 RGB 通道绝对误差约为 1.3、1.2、6.6（满量程 255）；图表颜色、坐标轴和字体有可见差异。浏览器导出的 PDF 每张为一页，英文文本可提取，但中文文字提取出现乱码，图表文本未被 PDF 文本提取器提取。这个样本证明基本解析和画面输出可行，尚不证明 iOS `WKWebView` 逐页导出、中文可选文本、真实课件版式或大文件稳定性。原型位于本机临时目录，不是应用功能，也没有上传用户教材。
 
 ## 下一轮离线原型的通过条件
 
