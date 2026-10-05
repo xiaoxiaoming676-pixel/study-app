@@ -98,6 +98,12 @@ void main() {
       textDirection: TextDirection.ltr,
     )..layout();
     otherLabel.paint(rasterCanvas, const Offset(75, 190));
+    final underlineY = 190 + otherLabel.height - 8;
+    final underlinePaint = Paint()..color = Colors.black;
+    underlinePaint.strokeWidth = 3;
+    rasterCanvas.drawLine(Offset(75, underlineY),
+        Offset(75 + otherLabel.width, underlineY),
+        underlinePaint);
     final raster = await recorder.endRecording().toImage(640, 320);
     final rasterBytes = await raster.toByteData(format: ui.ImageByteFormat.png);
     raster.dispose();
@@ -131,6 +137,15 @@ void main() {
         isTrue, reason: 'Black text on a yellow scanned highlight should be selected');
     expect(highlightMasks.any((mask) => (mask as Map)['answer'].toString().contains('Alpha')),
         isFalse, reason: 'Red text on white should not count as a highlight');
+    final underlineResult = await channel.invokeMapMethod<String, dynamic>('analyze', {
+      'bytes': scannedPdf, 'page': 0, 'keywords': <String>[],
+      'bold': false, 'underline': true, 'highlight': false, 'color': '',
+    });
+    final underlineMasks = (underlineResult?['masks'] as List?) ?? [];
+    expect(underlineMasks.any((mask) => (mask as Map)['answer'].toString().contains('Beta')),
+        isTrue, reason: 'A line below scanned text should yield a review candidate');
+    expect(underlineMasks.any((mask) => (mask as Map)['answer'].toString().contains('Alpha')),
+        isFalse, reason: 'Text without an underline should stay unselected');
 
     await tester.tap(find.byTooltip('学习：挖空与朗读'));
     await waitFor(tester, find.byType(StudyPanel));

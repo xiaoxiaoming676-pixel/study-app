@@ -80,3 +80,5 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 2026-10-06 正在增强导出回归：逐一用 PDF 阅读器重新打开三种导出，核对原文版、挖空版各 1 页、笔记答题版 2 页；重开学习面板后还等待页面预览出现，确认保存的 PDF 资产可实际渲染。此断言尚未通过云端验证。
 
 2026-10-06 [最终双模拟器运行 37345346944](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37345346944) **整体绿色通过**：对应 [Windows 运行 37345347141](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37345347141) 静态检查与 9/9 单元测试通过；iPhone、iPad 端到端日志各显示 `+1: All tests passed!`，没有 `FPDF_ERR_FORMAT`。流程包含扫描页黄色浅底高亮候选、红字颜色候选、PDF 导入与手指书写、挖空和长期笔记保存、朗读通道、保存 PDF 与导入源逐字节比对、三种 PDF 导出重新打开后的页数（原文与练习各 1 页，笔记答题 2 页），以及关闭重开后的教材页面预览、挖空和笔记。无签名 [Study 归档 11360794709](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37345346944/artifacts/11360794709) 为 22,154,203 字节，GitHub ZIP SHA256 `78f20c4408b6bd100f77684f055b0949ea8cac39768cdf42323e21ceab7c6e6c`，有效期至 2026-10-19 17:27 UTC。前两轮中有一次 PDFium 读取错误，当前两轮未复现，原因仍不明；继续保留导出断言。用户无苹果设备，真机与正式签名未完成；App 内直接 PPTX 仍缺可靠转换路径。
+
+2026-10-06 正在验证扫描页下划线候选：在 OCR 文字框下缘附近寻找跨越大部分文字宽度的深色横线；合成样本要求选中带横线的 Beta，排除无横线的 Alpha。候选仍需人工确认，代码尚待 iPhone、iPad 模拟器编译和业务回归。

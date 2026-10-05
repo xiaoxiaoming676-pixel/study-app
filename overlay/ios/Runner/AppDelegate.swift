@@ -15,7 +15,7 @@ import workmanager_apple
   /// OCR boxes are approximate, so every candidate still needs review.
   private static func recognizeScannedPage(_ page: PDFPage, bounds: CGRect,
                                            keywords: [String], color: String,
-                                           highlight: Bool) -> (text: String, masks: [[String: Any]]) {
+                                           highlight: Bool, underline: Bool) -> (text: String, masks: [[String: Any]]) {
     let longest = max(bounds.width, bounds.height)
     guard longest > 0 else { return ("", []) }
     let scale = min(CGFloat(3), CGFloat(2400) / longest)
@@ -25,7 +25,7 @@ import workmanager_apple
     let width = cgImage.width
     let height = cgImage.height
     let hasColor = color.count == 6 && Int(color, radix: 16) != nil
-    let needsPixels = hasColor || highlight
+    let needsPixels = hasColor || highlight || underline
     var pixels = needsPixels ? [UInt8](repeating: 255, count: width * height * 4) : []
     if needsPixels {
       pixels.withUnsafeMutableBytes { buffer in
@@ -86,6 +86,31 @@ import workmanager_apple
       // A background occupies much more of the OCR box than colored glyphs.
       return brightColor >= 16 && brightColor * 3 >= area
     }
+    func matchesUnderline(_ box: CGRect) -> Bool {
+      guard underline else { return false }
+      let (x0, x1, y0, y1) = pixelBounds(box)
+      let widthInside = x1 - x0
+      let heightInside = y1 - y0
+      guard widthInside >= 20, heightInside > 0 else { return false }
+      let inset = max(1, widthInside / 10)
+      let left = x0 + inset, right = x1 - inset
+      guard right > left else { return false }
+      // A rule spans most of the word, unlike descenders inside individual glyphs.
+      let firstRow = max(0, y1 - max(2, heightInside / 10))
+      let lastRow = min(height, y1 + max(4, heightInside / 4))
+      guard lastRow > firstRow else { return false }
+      for y in firstRow..<lastRow {
+        var dark = 0
+        for x in left..<right {
+          let offset = (y * width + x) * 4
+          if Int(pixels[offset]) + Int(pixels[offset + 1]) + Int(pixels[offset + 2]) < 330 {
+            dark += 1
+          }
+        }
+        if dark * 5 >= (right - left) * 3 { return true }
+      }
+      return false
+    }
     let request = VNRecognizeTextRequest()
     request.recognitionLevel = .accurate
     request.usesLanguageCorrection = true
@@ -115,7 +140,8 @@ import workmanager_apple
     for observation in observations {
       guard let recognized = observation.topCandidates(1).first else { continue }
       lines.append(recognized.string)
-      if matchesColor(observation.boundingBox) || matchesHighlight(observation.boundingBox) {
+      if matchesColor(observation.boundingBox) || matchesHighlight(observation.boundingBox)
+          || matchesUnderline(observation.boundingBox) {
         add(observation.boundingBox, answer: recognized.string)
       }
       for keyword in keywords where !keyword.isEmpty {
@@ -224,7 +250,8 @@ import workmanager_apple
           let extractedText = page.string ?? ""
           let scan = extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             ? Self.recognizeScannedPage(page, bounds: bounds, keywords: keywords,
-                color: wantedColor, highlight: highlight) : (text: "", masks: [[String: Any]]())
+                color: wantedColor, highlight: highlight, underline: underline)
+            : (text: "", masks: [[String: Any]]())
           let text = scan.text.isEmpty ? extractedText : scan.text
           var masks: [[String: Any]] = scan.masks
           var seen = Set<String>()
