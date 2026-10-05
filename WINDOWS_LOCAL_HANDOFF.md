@@ -22,7 +22,9 @@ GitHub Actions 运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/stu
 
 用户已登录网页并核对：运行页提示“recent account payments have failed or your spending limit needs to be increased”。账户 Billing Overview 显示 **2,000/2,000 Actions 免费分钟用尽**、本月计费 $0；Budgets and alerts 中 Actions 预算为 **$0** 且 Stop usage 为 Yes。免费分钟约 27 天后重置。应以这条已确认信息替代上段的待核查推测；没有修改预算或支付设置。仓库仍为私有。
 
-用户选择公开仓库以使用免费的标准 GitHub 托管运行器，操作待最终确认。公开前检查当前源码与 28 次提交补丁，未发现密钥格式或曾删除文件；历史提交包含作者邮箱和本机用户名路径，Actions 历史/日志公开后也会可见。当前文档已去掉绝对本机路径，历史记录仍保留。不修改 $0 Actions 预算。
+用户最终确认后，仓库已改为公开，GitHub API 也确认 `visibility=public`。公开前检查当前源码与 28 次提交补丁，未发现密钥格式或曾删除文件；历史提交包含作者邮箱和本机用户名路径，Actions 历史/日志现已可见。当前文档已去掉绝对本机路径，历史记录仍保留。未修改 $0 Actions 预算。
+
+[公开后的 Windows 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267237712) 已在实际托管运行器上通过：Flutter 学习模块静态检查无问题，9/9 项单元测试通过。[iOS 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267208722) 已获得 macOS 运行器，静态检查和 9/9 项单元测试通过，模拟器端到端测试仍在执行。此前的零步骤故障是私有仓库免费分钟用尽所致。
 
 ## 本次 Windows 本地结果
 
@@ -31,9 +33,9 @@ GitHub Actions 运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/stu
 ## 在 Windows 本地接手时立即做
 
 1. 确认当前任务使用 **本机 Windows 文件系统/终端**，而非云端 Linux。记录 `pwd` / `Get-Location`、`git --version`、`python --version`、`flutter --version`（若有），不要回显敏感环境变量。
-2. 获取私有仓库最新 main，确认 main 包含上面的检查点；若已有工作树，先看 `git status` 并保留用户改动。读 `README.md`、`BUILD_PROGRESS.md`、`INSTALL_WINDOWS.md` 和工作流，按固定 Saber 基线应用 overlay；不要从零重建。
+2. 获取公开仓库最新 main，确认 main 包含上面的检查点；若已有工作树，先看 `git status` 并保留用户改动。读 `README.md`、`BUILD_PROGRESS.md`、`INSTALL_WINDOWS.md` 和工作流，按固定 Saber 基线应用 overlay；不要从零重建。
 3. 在 Windows 跑能运行的 Python 教材转换测试：`python -m unittest discover -s tools/study -p "test_*.py" -v`（在覆盖后的 Saber 源码中）；如有 Flutter SDK，跑学习模块静态分析及 `flutter test test/study`。若本机无 SDK，判断安装或可用替代途径，先做其他检查。
-4. 零步骤作业的网页提示和 2,000/2,000 免费分钟、$0 停用预算已确认。继续本地和代码工作；未经用户明确决定不改变预算、支付设置或仓库可见性。
+4. 零步骤作业的网页提示和 2,000/2,000 免费分钟、$0 停用预算已确认；用户已授权公开仓库，新工作流已进入运行器。继续本地和代码工作；未经用户明确决定不改变预算或支付设置。
 5. Windows 无 Xcode，不能本机运行 iOS 模拟器或生成 iOS 正式包；云端 Mac 恢复后重跑集成测试并修问题。用户无 iPhone/iPad，暂不安装 Sideloadly、不做个人签名或真机测试。可用模拟器覆盖核心流程，真机验收需将来借用设备或合适的远程真机服务。
 6. 修复和测试证据提交仓库，每步更新 `BUILD_PROGRESS.md`。不要把“编译成功”当成功能通过。优先完成 PDF 导入/手指书写/保存重开、挖空、笔记、朗读，再处理 PPTX 一键导入路线和扫描图中样式标记识别。
 

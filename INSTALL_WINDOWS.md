@@ -6,9 +6,9 @@
 
 ## 今天在 Windows 电脑上做
 
-1. 登录仓库，打开[第十三次云端构建](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37247985115)和[Windows 验证运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37265710398)，查看作业顶部的原始失败提示。两者都在分配运行器前失败，先核对 GitHub 账户的 Actions 用量与限制；不要因为推测额度不足就直接付款。
-2. 下载仓库源码，运行 Windows 可执行的 Python 教材转换测试和 Flutter 学习模块静态分析/单元测试（需要配置 Python、Flutter）。我拿到电脑访问能力后会尽量直接执行并处理报错。
-3. 在 GitHub Mac 运行器恢复后构建 iOS、跑 iPhone 模拟器完整流程，再下载绿色通过的无签名产物。Windows 本机不能运行 Xcode iOS 模拟器或完成 iOS 构建。
+1. 先前的零步骤失败是私有仓库免费分钟 2,000/2,000 用尽且 Actions 预算为 $0 所致。用户确认后仓库已公开，标准托管运行器已能启动；未修改预算或支付资料。
+2. Windows 本地 PowerPoint 教材转换及 Python 工具测试 10/10 通过。[公开后的 Windows Flutter 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267237712) 静态检查无问题，9/9 项学习模块测试通过。
+3. [公开后的 iOS 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267208722) 已获得 Mac 运行器，静态检查和 9/9 项单元测试通过，模拟器端到端测试仍在执行。仅在整条工作流绿色通过后使用它的无签名产物。Windows 本机不能运行 Xcode iOS 模拟器或完成 iOS 构建。
 4. PPTX 可先在 Windows 的 PowerPoint 或 LibreOffice 导出 PDF 检查教材版式；App 内直接导入 PPTX 仍需继续开发。
 
 下面的 IPA、签名和真机步骤保留给将来有 iPhone/iPad 时使用。现在不用安装 Sideloadly，不用准备 Apple ID 签名，也不用购买苹果设备来完成本阶段的软件检查。
@@ -19,9 +19,9 @@
 2. 在 Windows PowerShell 进入文件夹运行 `Get-FileHash .\Study-UNSIGNED.ipa -Algorithm SHA256`，与 `SHA256.txt` 对照。该包未签名，直接点开不会装到 iPhone。
 3. 如需确认名称和包标识，可解压 IPA，查看 `Payload/Runner.app/Info.plist`；签名工具可能在安装时调整实际标识，请记录最终值。
 
-## GitHub 构建暂时受阻时的临时包
+## 旧版临时包
 
-2026-10-05：第十三次运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37247985115) 两次均在分配运行器前失败（0 步、0 计费毫秒），原因尚须在仓库拥有者的 Actions 页面核对，不能称为源码编译失败。若将来有 iPhone、只需验证电脑签名/手机安装流程，可下载[第十二次无签名产物](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37246129034/artifacts/11319767491)。IPA SHA256：`63b79316f4ebbd35a2ed6460467c8fef719fa39f1949c0f7afaef9bc7fb91b85`。这版仍是上游 Saber 标识，模拟器端到端测试未通过（测试辅助方法异常）；仅用于无敏感资料的临时排错。未来独立 Study 包不会直接覆盖它，测试笔记须先导出备份。
+2026-10-05：第十三次运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37247985115) 两次均在分配运行器前失败（0 步、0 计费毫秒），原因已确认为私有仓库免费分钟用尽与 $0 停用预算。若将来有 iPhone、只需验证电脑签名/手机安装流程，可下载[第十二次无签名产物](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37246129034/artifacts/11319767491)。IPA SHA256：`63b79316f4ebbd35a2ed6460467c8fef719fa39f1949c0f7afaef9bc7fb91b85`。这版仍是上游 Saber 标识，模拟器端到端测试未通过（测试辅助方法异常）；仅用于无敏感资料的临时排错。未来独立 Study 包不会直接覆盖它，测试笔记须先导出备份。
 
 ## 将来有 iPhone 时：Windows 签名安装
 
