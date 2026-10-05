@@ -2,6 +2,8 @@
 
 更新：2026-10-05。仓库：https://github.com/xiaoxiaoming676-pixel/study-app ，上一个已核验的开发检查点：`7454f5076c87976d1c49609bf0d6fd396eea78c9`；请以仓库实时 main 为准。
 
+本次 Windows 接手新增提交：`bdd2dd9ac623117627e0c9850f0fa6a962fa4149`（PowerPoint 教材转换及本地测试）、`37f437059737030be2f4e5e6ccd045259ffa614f`（独立 Windows Flutter 验证工作流）。详见 `BUILD_PROGRESS.md`。
+
 ## 用户目标与设备
 
 第一版优先做出可用的 iPhone 学习 App：PPT/教材导入、任意空白书写笔记并保存、标记或关键词自动挖空（不只红色）、扫描页 OCR、普通男女系统朗读，iPhone 优先兼顾 iPad。用户现在只有 Windows 笔记本和 Android 手机，**没有任何苹果设备**。每一步修复要提交到仓库并更新 `BUILD_PROGRESS.md`。
@@ -15,6 +17,12 @@
 ## 当前云端阻塞
 
 GitHub Actions 运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37247985115) 首次及重试均在运行器分配前失败：`runner_id=0`、`steps=[]`、约 6–8 秒、计费 0 毫秒。无法从 API 读取此零步骤作业的错误横幅。仓库拥有者登录网页后需查看运行页面顶部的原始提示，再查看 GitHub Settings → Billing / Actions 用量或限制；**不要未经用户决定自行增加预算或付费**。这次失败不能视为源码编译错误。本地核对了工作流 YAML 可解析，以及上游项目包标识替换的数量断言成立。
+
+后续 [macOS 运行 37260329062](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37260329062) 与 [Windows 运行 37265710398](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37265710398) 也都是 0 步、`runner_id=0`、0 计费毫秒，尚无 Flutter 分析或编译结果。未登录的浏览器对私有仓库显示 404，已打开登录页；等用户登录后查看横幅。跨 macOS/Windows 都失败提示可能是账户或仓库级 Actions 限制，但**具体原因尚未确认**。
+
+## 本次 Windows 本地结果
+
+任务运行在用户电脑 `C:\Users\qqq\Documents` 的 PowerShell；Python 3.10.7 和 PowerPoint 16.0 可用，Git/Flutter 命令不在 PATH。仓库源码通过 GitHub 连接取得；Git 与固定 Saber 源码压缩包的下载因网络慢/中断未完成。已给 `overlay/tools/study/prepare.py` 增加 Windows PowerPoint PDF 转换路径，完整的 Python 教材工具测试 **10/10 通过**，含中文文件名 PPTX 转换、挖空和 PDF 几何/批注测试；Python 语法编译通过。本机未运行 Flutter 静态分析、Dart 测试、Xcode 或 iOS 模拟器。不要把 Windows 教材工具通过视为 App 业务流程通过。
 
 ## 在 Windows 本地接手时立即做
 

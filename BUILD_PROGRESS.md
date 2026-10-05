@@ -44,3 +44,5 @@ GitHub 构建记录：https://github.com/xiaoxiaoming676-pixel/study-app/actions
 GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作业、0 步、`runner_id=0`、计费 0 毫秒；读取作业日志返回不存在。浏览器入口本轮无法载入 GitHub 页面，仍未取得网页顶部的原始失败提示，暂不能确认是额度、账单还是其他运行器限制。没有修改任何付费设置。用户没有苹果设备，iOS 模拟器完整流程及真机体验仍待云端 Mac 恢复和未来有设备时验证。
 
 提交 `bdd2dd9ac623117627e0c9850f0fa6a962fa4149` 已把上述 Windows PowerPoint 转换、中文路径回归测试及本地 10/10 测试证据推送至 main。它触发的 [第十四次 iOS 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37260329062) 再次于约 8 秒后失败：0 步、`runner_id=0`、macOS 计费 0 毫秒；新代码仍未进入云端编译。已新增独立的 Windows Flutter 静态分析和学习单元测试工作流，以尝试在无 Mac 运行器时取得 Dart 结果；其 YAML 已在本机解析，运行结果待核对。GitHub 网页在未登录状态对私有仓库显示 404，已打开登录页供仓库拥有者查看原始提示。
+
+提交 `37f437059737030be2f4e5e6ccd045259ffa614f` 新增的 [Windows Flutter 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37265710398) 也在约 6 秒后失败：0 步、`runner_id=0`、Windows 计费 0 毫秒。两种操作系统的托管运行器均未启动，不能把失败归因于 Flutter 源码或仅 macOS 镜像。下一步需在已登录 GitHub 的运行页面读取顶部原始提示，再决定是否调整 Actions 设置；未经用户决定不增加预算或付费。

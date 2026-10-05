@@ -6,7 +6,7 @@
 
 ## 今天在 Windows 电脑上做
 
-1. 登录仓库，打开[第十三次云端构建](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37247985115)，截图作业顶部的原始失败提示。该次运行分配运行器前失败，先核对 GitHub 账户的 Actions 用量与限制；不要因为推测额度不足就直接付款。
+1. 登录仓库，打开[第十三次云端构建](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37247985115)和[Windows 验证运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37265710398)，查看作业顶部的原始失败提示。两者都在分配运行器前失败，先核对 GitHub 账户的 Actions 用量与限制；不要因为推测额度不足就直接付款。
 2. 下载仓库源码，运行 Windows 可执行的 Python 教材转换测试和 Flutter 学习模块静态分析/单元测试（需要配置 Python、Flutter）。我拿到电脑访问能力后会尽量直接执行并处理报错。
 3. 在 GitHub Mac 运行器恢复后构建 iOS、跑 iPhone 模拟器完整流程，再下载绿色通过的无签名产物。Windows 本机不能运行 Xcode iOS 模拟器或完成 iOS 构建。
 4. PPTX 可先在 Windows 的 PowerPoint 或 LibreOffice 导出 PDF 检查教材版式；App 内直接导入 PPTX 仍需继续开发。
