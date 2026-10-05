@@ -1,6 +1,6 @@
 # Windows 本地任务交接 · Study iOS App
 
-更新：2026-10-05。仓库：https://github.com/xiaoxiaoming676-pixel/study-app ，当前 main 检查点：`7454f5076c87976d1c49609bf0d6fd396eea78c9`。
+更新：2026-10-05。仓库：https://github.com/xiaoxiaoming676-pixel/study-app ，上一个已核验的开发检查点：`7454f5076c87976d1c49609bf0d6fd396eea78c9`；请以仓库实时 main 为准。
 
 ## 用户目标与设备
 
@@ -19,7 +19,7 @@ GitHub Actions 运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/stu
 ## 在 Windows 本地接手时立即做
 
 1. 确认当前任务使用 **本机 Windows 文件系统/终端**，而非云端 Linux。记录 `pwd` / `Get-Location`、`git --version`、`python --version`、`flutter --version`（若有），不要回显敏感环境变量。
-2. 获取私有仓库最新 main，核对上面的检查点；若已有工作树，先看 `git status` 并保留用户改动。读 `README.md`、`BUILD_PROGRESS.md`、`INSTALL_WINDOWS.md` 和工作流，按固定 Saber 基线应用 overlay；不要从零重建。
+2. 获取私有仓库最新 main，确认 main 包含上面的检查点；若已有工作树，先看 `git status` 并保留用户改动。读 `README.md`、`BUILD_PROGRESS.md`、`INSTALL_WINDOWS.md` 和工作流，按固定 Saber 基线应用 overlay；不要从零重建。
 3. 在 Windows 跑能运行的 Python 教材转换测试：`python -m unittest discover -s tools/study -p "test_*.py" -v`（在覆盖后的 Saber 源码中）；如有 Flutter SDK，跑学习模块静态分析及 `flutter test test/study`。若本机无 SDK，判断安装或可用替代途径，先做其他检查。
 4. 用 GitHub 网页查零步骤作业的具体提示。若属于额度/账单限制，向用户说明选项及代价，未经明确决定不改变付费设置；继续做本地和代码工作。
 5. Windows 无 Xcode，不能本机运行 iOS 模拟器或生成 iOS 正式包；云端 Mac 恢复后重跑集成测试并修问题。用户无 iPhone/iPad，暂不安装 Sideloadly、不做个人签名或真机测试。可用模拟器覆盖核心流程，真机验收需将来借用设备或合适的远程真机服务。
