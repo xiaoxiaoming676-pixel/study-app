@@ -108,7 +108,7 @@ void main() {
     expect(scanResult?['masks'], isNotEmpty);
     final colorResult = await channel.invokeMapMethod<String, dynamic>('analyze', {
       'bytes': scannedPdf, 'page': 0, 'keywords': <String>[],
-      'bold': false, 'underline': false, 'highlight': false, 'color': 'FF0000',
+      'bold': false, 'underline': false, 'highlight': false, 'color': 'F44336',
     });
     expect(colorResult?['text'], contains('Alpha'));
     final colorMasks = (colorResult?['masks'] as List?) ?? [];
