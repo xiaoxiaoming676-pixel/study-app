@@ -15,7 +15,7 @@ concurrency:
 jobs:
   build:
     runs-on: macos-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     defaults:
       run:
         shell: bash
@@ -85,6 +85,20 @@ jobs:
         continue-on-error: true
         timeout-minutes: 20
         run: flutter test integration_test/study_flow_test.dart -d "$STUDY_SIM_ID" --reporter expanded
+      - name: Boot available iPad simulator
+        run: |
+          set -euo pipefail
+          xcrun simctl shutdown "$STUDY_SIM_ID" || true
+          ipad_id=$(xcrun simctl list devices available --json | python3 -c 'import json,sys; data=json.load(sys.stdin)["devices"]; candidates=[d for entries in data.values() for d in entries if d.get("isAvailable", True) and d["name"].startswith("iPad")]; print(candidates[-1]["udid"] if candidates else "")')
+          test -n "$ipad_id" || { echo 'No iPad simulator is available on this runner'; exit 1; }
+          xcrun simctl boot "$ipad_id" || true
+          xcrun simctl bootstatus "$ipad_id" -b
+          echo "STUDY_IPAD_ID=$ipad_id" >> "$GITHUB_ENV"
+      - name: Test study flow on iPad simulator
+        id: ipad_flow
+        continue-on-error: true
+        timeout-minutes: 20
+        run: flutter test integration_test/study_flow_test.dart -d "$STUDY_IPAD_ID" --reporter expanded
       - name: Build unsigned iOS app
         run: flutter build ios --release --no-codesign
       - name: Package unsigned app
@@ -108,5 +122,5 @@ jobs:
           if-no-files-found: error
           retention-days: 14
       - name: Enforce simulator test result
-        if: steps.flow.outcome != 'success'
+        if: steps.flow.outcome != 'success' || steps.ipad_flow.outcome != 'success'
         run: exit 1
