@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:pdfrx/pdfrx.dart';
 import 'package:saber/components/canvas/image/editor_image.dart';
 import 'package:saber/components/study/study_panel.dart';
 import 'package:saber/data/editor/editor_core_info.dart';
@@ -143,8 +144,9 @@ void main() {
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pump(const Duration(milliseconds: 350));
     await tester.tap(find.text('生成候选'));
-    await waitFor(tester, find.text('保存候选'));
-    await tester.tap(find.text('保存候选'));
+    final saveCandidates = find.text('保存候选').hitTestable();
+    await waitFor(tester, saveCandidates);
+    await tester.tap(saveCandidates);
     await waitFor(tester, find.textContaining('0 / 1 已答'));
     final enabledNote = find.byWidgetPredicate((widget) =>
         widget is IconButton &&
@@ -176,6 +178,11 @@ void main() {
       expect(exported.length, greaterThan(1000), reason: '$mode is empty');
       expect(exported.sublist(0, 4), [0x25, 0x50, 0x44, 0x46],
           reason: '$mode is not a PDF');
+      final outputDocument = await PdfDocument.openData(exported);
+      expect(outputDocument.pages.length,
+          mode == StudyExportMode.annotated ? 2 : 1,
+          reason: '$mode has the wrong number of pages');
+      outputDocument.dispose();
     }
 
     await tester.tap(find.text('听读').last);
@@ -196,6 +203,9 @@ void main() {
     await waitFor(tester, reopenedStudyButton);
     await tester.tap(reopenedStudyButton);
     await waitFor(tester, find.byType(StudyPanel));
+    await waitFor(tester, find.descendant(
+        of: find.byType(StudyPanel), matching: find.byType(Image)));
+    expect(find.textContaining('页面加载失败'), findsNothing);
     expect(find.textContaining('0 / 1 已答'), findsOneWidget);
     await tester.tap(find.byTooltip('长期笔记'));
     await waitFor(tester, find.text('这段需要复习'));

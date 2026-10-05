@@ -7,8 +7,8 @@
 ## 今天在 Windows 电脑上做
 
 1. 先前的零步骤失败是私有仓库免费分钟 2,000/2,000 用尽且 Actions 预算为 $0 所致。用户确认后仓库已公开，标准托管运行器已能启动；未修改预算或支付资料。
-2. Windows 本地 PowerPoint 教材转换及 Python 工具测试 10/10 通过。[公开后的 Windows Flutter 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267237712) 静态检查无问题，9/9 项学习模块测试通过。
-3. [最新 iOS 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37319109435) 已整体绿色通过：静态检查、9/9 项单元测试、iPhone 与 iPad 模拟器完整学习流程测试（含扫描页字体颜色）和无签名编译/上传均通过。可在 Artifacts 获取最新 [Study-unsigned-iOS-app](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37319109435/artifacts/11351295695)，归档有效期至 2026-10-19 14:15 UTC。用户目前没有苹果设备，不需要下载或尝试安装；Windows 本机不能运行 Xcode iOS 模拟器或完成 iOS 构建。
+2. Windows 本地 PowerPoint 教材转换及 Python 工具测试 10/10 通过。[最新 Windows Flutter 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37334091028) 静态检查无问题，9/9 项学习模块测试通过。
+3. [最新绿色 iOS 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37334090670) 已整体通过：静态检查、9/9 项单元测试、iPhone 与 iPad 模拟器完整学习流程测试（含扫描页字体颜色、保存 PDF 字节比对和三种 PDF 导出）和无签名编译/上传均通过。可在 Artifacts 获取 [Study-unsigned-iOS-app](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37334090670/artifacts/11356863783)，归档有效期至 2026-10-19 16:12 UTC。用户目前没有苹果设备，不需要下载或尝试安装；Windows 本机不能运行 Xcode iOS 模拟器或完成 iOS 构建。新提交的扫描高亮候选尚在云端验证中。
 4. PPTX 可先在 Windows 的 PowerPoint 或 LibreOffice 导出 PDF 检查教材版式；App 内直接导入 PPTX 仍需继续开发。
 
 下面的 IPA、签名和真机步骤保留给将来有 iPhone/iPad 时使用。现在不用安装 Sideloadly，不用准备 Apple ID 签名，也不用购买苹果设备来完成本阶段的软件检查。
@@ -21,7 +21,7 @@
 
 ## 旧版临时包
 
-2026-10-05：第十三次运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37247985115) 两次均在分配运行器前失败（0 步、0 计费毫秒），原因已确认为私有仓库免费分钟用尽与 $0 停用预算。若将来有 iPhone、只需验证电脑签名/手机安装流程，可下载[第十二次无签名产物](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37246129034/artifacts/11319767491)。IPA SHA256：`63b79316f4ebbd35a2ed6460467c8fef719fa39f1949c0f7afaef9bc7fb91b85`。这版仍是上游 Saber 标识，模拟器端到端测试未通过（测试辅助方法异常）；仅用于无敏感资料的临时排错。未来独立 Study 包不会直接覆盖它，测试笔记须先导出备份。
+2026-10-05：早期私有仓库曾因免费 Actions 分钟用尽与 $0 停用预算而无法分配运行器；仓库改为公开后已恢复。历史失败和旧 Saber 标识产物仅留在 [BUILD_PROGRESS.md](BUILD_PROGRESS.md) 供追溯，安装时只选择上方最新绿色 Study 归档。
 
 ## 将来有 iPhone 时：Windows 签名安装
 
