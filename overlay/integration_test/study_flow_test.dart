@@ -143,8 +143,10 @@ void main() {
     await waitFor(tester, find.byType(HomePage));
     GoRouter.of(tester.element(find.byType(HomePage)))
         .push(RoutePaths.editFilePath(notePath));
-    await waitFor(tester, find.byTooltip('学习：挖空与朗读'));
-    await tester.tap(find.byTooltip('学习：挖空与朗读'));
+    final reopenedStudyButton =
+        find.byTooltip('学习：挖空与朗读').hitTestable();
+    await waitFor(tester, reopenedStudyButton);
+    await tester.tap(reopenedStudyButton);
     await waitFor(tester, find.byType(StudyPanel));
     expect(find.textContaining('0 / 1 已答'), findsOneWidget);
     await tester.tap(find.byTooltip('长期笔记'));

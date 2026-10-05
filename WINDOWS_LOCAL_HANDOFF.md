@@ -14,7 +14,7 @@
 
 新版 `Study` 名称与 `com.xiaoxiaoming676.studyapp` 标识写在工作流应用步骤，**尚未由云端运行器执行并验证**。旧 IPA 仍叫 Saber 且未签名，不是可安装交付版。App 内直接 PPTX 转换尚未完成；Windows 教材工具在 `overlay/tools/study/`。
 
-## 当前云端阻塞
+## 先前的云端阻塞与解决
 
 GitHub Actions 运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37247985115) 首次及重试均在运行器分配前失败：`runner_id=0`、`steps=[]`、约 6–8 秒、计费 0 毫秒。无法从 API 读取此零步骤作业的错误横幅。仓库拥有者登录网页后需查看运行页面顶部的原始提示，再查看 GitHub Settings → Billing / Actions 用量或限制；**不要未经用户决定自行增加预算或付费**。这次失败不能视为源码编译错误。本地核对了工作流 YAML 可解析，以及上游项目包标识替换的数量断言成立。
 
@@ -24,7 +24,7 @@ GitHub Actions 运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/stu
 
 用户最终确认后，仓库已改为公开，GitHub API 也确认 `visibility=public`。公开前检查当前源码与 28 次提交补丁，未发现密钥格式或曾删除文件；历史提交包含作者邮箱和本机用户名路径，Actions 历史/日志现已可见。当前文档已去掉绝对本机路径，历史记录仍保留。未修改 $0 Actions 预算。
 
-[公开后的 Windows 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267237712) 已在实际托管运行器上通过：Flutter 学习模块静态检查无问题，9/9 项单元测试通过。[iOS 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267208722) 已获得 macOS 运行器，静态检查和 9/9 项单元测试通过，模拟器端到端测试仍在执行。此前的零步骤故障是私有仓库免费分钟用尽所致。
+[公开后的 Windows 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267237712) 已在实际托管运行器上通过：Flutter 学习模块静态检查无问题，9/9 项单元测试通过。[iOS 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267208722) 静态检查、9/9 项单元测试、无签名编译和归档上传成功，但模拟器端到端测试失败，整条工作流为红色。模拟器实际执行了 PDF 导入、手指书写、保存、OCR、挖空、长期笔记和朗读；测试脚本在关闭并重新打开笔记后点中了不可命中的旧 Tooltip，未完成重开后的 UI 断言。已改为等待可命中的学习按钮，下一轮重跑。步骤列表因 `continue-on-error` 显示 `conclusion=success`，必须查看日志和最终工作流结论。此前的零步骤故障是私有仓库免费分钟用尽所致。
 
 ## 本次 Windows 本地结果
 
