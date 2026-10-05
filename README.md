@@ -9,6 +9,7 @@
 - Windows 验证与将来有 iPhone 时的自用安装：[INSTALL_WINDOWS.md](INSTALL_WINDOWS.md)。
 - 稳定测试与正式交付路径、功能缺口：[RELEASE_OPTIONS.md](RELEASE_OPTIONS.md)。
 - 可核对的构建证据：[BUILD_PROGRESS.md](BUILD_PROGRESS.md)。
+- 手机内 PPTX 导入路线与质量门槛：[PPTX_EVALUATION.md](PPTX_EVALUATION.md)。
 - 暂时没有电脑时的实际限制与 iPhone 文档转换：[PHONE_ONLY.md](PHONE_ONLY.md)。
 
 ## 源码与构建
