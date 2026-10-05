@@ -20,16 +20,20 @@ GitHub Actions 运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/stu
 
 后续 [macOS 运行 37260329062](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37260329062) 与 [Windows 运行 37265710398](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37265710398) 也都是 0 步、`runner_id=0`、0 计费毫秒，尚无 Flutter 分析或编译结果。未登录的浏览器对私有仓库显示 404，已打开登录页；等用户登录后查看横幅。跨 macOS/Windows 都失败提示可能是账户或仓库级 Actions 限制，但**具体原因尚未确认**。
 
+用户已登录网页并核对：运行页提示“recent account payments have failed or your spending limit needs to be increased”。账户 Billing Overview 显示 **2,000/2,000 Actions 免费分钟用尽**、本月计费 $0；Budgets and alerts 中 Actions 预算为 **$0** 且 Stop usage 为 Yes。免费分钟约 27 天后重置。应以这条已确认信息替代上段的待核查推测；没有修改预算或支付设置。仓库仍为私有。
+
+用户选择公开仓库以使用免费的标准 GitHub 托管运行器，操作待最终确认。公开前检查当前源码与 28 次提交补丁，未发现密钥格式或曾删除文件；历史提交包含作者邮箱和本机用户名路径，Actions 历史/日志公开后也会可见。当前文档已去掉绝对本机路径，历史记录仍保留。不修改 $0 Actions 预算。
+
 ## 本次 Windows 本地结果
 
-任务运行在用户电脑 `C:\Users\qqq\Documents` 的 PowerShell；Python 3.10.7 和 PowerPoint 16.0 可用，Git/Flutter 命令不在 PATH。仓库源码通过 GitHub 连接取得；Git 与固定 Saber 源码压缩包的下载因网络慢/中断未完成。已给 `overlay/tools/study/prepare.py` 增加 Windows PowerPoint PDF 转换路径，完整的 Python 教材工具测试 **10/10 通过**，含中文文件名 PPTX 转换、挖空和 PDF 几何/批注测试；Python 语法编译通过。本机未运行 Flutter 静态分析、Dart 测试、Xcode 或 iOS 模拟器。不要把 Windows 教材工具通过视为 App 业务流程通过。
+任务运行在用户电脑 Documents 目录的 PowerShell；Python 3.10.7 和 PowerPoint 16.0 可用，Git/Flutter 命令不在 PATH。仓库源码通过 GitHub 连接取得；Git 与固定 Saber 源码压缩包的下载因网络慢/中断未完成。已给 `overlay/tools/study/prepare.py` 增加 Windows PowerPoint PDF 转换路径，完整的 Python 教材工具测试 **10/10 通过**，含中文文件名 PPTX 转换、挖空和 PDF 几何/批注测试；Python 语法编译通过。本机未运行 Flutter 静态分析、Dart 测试、Xcode 或 iOS 模拟器。不要把 Windows 教材工具通过视为 App 业务流程通过。
 
 ## 在 Windows 本地接手时立即做
 
 1. 确认当前任务使用 **本机 Windows 文件系统/终端**，而非云端 Linux。记录 `pwd` / `Get-Location`、`git --version`、`python --version`、`flutter --version`（若有），不要回显敏感环境变量。
 2. 获取私有仓库最新 main，确认 main 包含上面的检查点；若已有工作树，先看 `git status` 并保留用户改动。读 `README.md`、`BUILD_PROGRESS.md`、`INSTALL_WINDOWS.md` 和工作流，按固定 Saber 基线应用 overlay；不要从零重建。
 3. 在 Windows 跑能运行的 Python 教材转换测试：`python -m unittest discover -s tools/study -p "test_*.py" -v`（在覆盖后的 Saber 源码中）；如有 Flutter SDK，跑学习模块静态分析及 `flutter test test/study`。若本机无 SDK，判断安装或可用替代途径，先做其他检查。
-4. 用 GitHub 网页查零步骤作业的具体提示。若属于额度/账单限制，向用户说明选项及代价，未经明确决定不改变付费设置；继续做本地和代码工作。
+4. 零步骤作业的网页提示和 2,000/2,000 免费分钟、$0 停用预算已确认。继续本地和代码工作；未经用户明确决定不改变预算、支付设置或仓库可见性。
 5. Windows 无 Xcode，不能本机运行 iOS 模拟器或生成 iOS 正式包；云端 Mac 恢复后重跑集成测试并修问题。用户无 iPhone/iPad，暂不安装 Sideloadly、不做个人签名或真机测试。可用模拟器覆盖核心流程，真机验收需将来借用设备或合适的远程真机服务。
 6. 修复和测试证据提交仓库，每步更新 `BUILD_PROGRESS.md`。不要把“编译成功”当成功能通过。优先完成 PDF 导入/手指书写/保存重开、挖空、笔记、朗读，再处理 PPTX 一键导入路线和扫描图中样式标记识别。
 

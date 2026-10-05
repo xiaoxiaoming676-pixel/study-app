@@ -37,7 +37,7 @@ GitHub 构建记录：https://github.com/xiaoxiaoming676-pixel/study-app/actions
 
 2026-10-05 用户更正设备条件：当前没有 iPhone、iPad 或其他苹果设备，今天只能拿到 Windows 电脑。已修正安装文档：先查 GitHub Actions 的无运行器失败提示、做 Windows 可执行的源码/教材工具测试；iOS 编译和模拟器继续依赖云端 Mac，签名安装与真机验收延后至有设备/合适远程真机时。先前要求今天用电脑签名安装到本人 iPhone 的步骤不适用。
 
-2026-10-05 Windows 本地接手：在用户电脑 `C:\Users\qqq\Documents` 运行 PowerShell，Python 3.10.7 可用；Git 和 Flutter 命令均未安装或未在 PATH。私有仓库实时 main 为 `ae6b2b480f7ec1e3a74574827a89ea7386431b50`，确认它包含交接检查点 `7454f5076c87976d1c49609bf0d6fd396eea78c9`。已通过仓库连接取回源码；固定 Saber 基线的压缩包下载中断，且本机无 Flutter SDK，所以本轮不能声称完成 Flutter 静态分析、Dart 测试或 iOS 编译。
+2026-10-05 Windows 本地接手：在用户电脑的 Documents 目录运行 PowerShell，Python 3.10.7 可用；Git 和 Flutter 命令均未安装或未在 PATH。私有仓库实时 main 为 `ae6b2b480f7ec1e3a74574827a89ea7386431b50`，确认它包含交接检查点 `7454f5076c87976d1c49609bf0d6fd396eea78c9`。已通过仓库连接取回源码；固定 Saber 基线的压缩包下载中断，且本机无 Flutter SDK，所以本轮不能声称完成 Flutter 静态分析、Dart 测试或 iOS 编译。
 
 本机安装了 PowerPoint 16.0，教材工具新增无 LibreOffice 时调用 PowerPoint 导出 PDF 的路径，支持中文文件名，无需改变系统 PowerShell 执行策略。PowerPoint 实际导出的文件以 `%PDF-` 开头；`python -m py_compile` 通过；在本地虚拟环境安装固定的 `python-pptx 1.0.2` 和 `PyMuPDF 1.26.6` 后，`python -m unittest discover -s tools/study -p "test_*.py" -v` 全部 **10/10 通过**，其中包含真实 PPTX 转换和挖空生成。Windows 教材工具可用，但 App 内 PPTX 一键导入仍未完成。
 
@@ -46,3 +46,7 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 提交 `bdd2dd9ac623117627e0c9850f0fa6a962fa4149` 已把上述 Windows PowerPoint 转换、中文路径回归测试及本地 10/10 测试证据推送至 main。它触发的 [第十四次 iOS 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37260329062) 再次于约 8 秒后失败：0 步、`runner_id=0`、macOS 计费 0 毫秒；新代码仍未进入云端编译。已新增独立的 Windows Flutter 静态分析和学习单元测试工作流，以尝试在无 Mac 运行器时取得 Dart 结果；其 YAML 已在本机解析，运行结果待核对。GitHub 网页在未登录状态对私有仓库显示 404，已打开登录页供仓库拥有者查看原始提示。
 
 提交 `37f437059737030be2f4e5e6ccd045259ffa614f` 新增的 [Windows Flutter 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37265710398) 也在约 6 秒后失败：0 步、`runner_id=0`、Windows 计费 0 毫秒。两种操作系统的托管运行器均未启动，不能把失败归因于 Flutter 源码或仅 macOS 镜像。下一步需在已登录 GitHub 的运行页面读取顶部原始提示，再决定是否调整 Actions 设置；未经用户决定不增加预算或付费。
+
+2026-10-05 登录后确认账户级阻塞：上述 [iOS 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37247985115) 与 [Windows 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37265710398) 顶部均提示作业未启动，原因是最近付款失败或需提高支出上限。账户 [Billing Overview](https://github.com/settings/billing) 显示 GitHub Free 的 Actions 免费分钟 **2,000 / 2,000 已用完**、本月已计费金额 $0；[Budgets and alerts](https://github.com/settings/billing/budgets) 显示 Actions 预算 **$0** 且“Stop usage”启用。这一组合足以解释私有仓库的托管运行器被阻止；没有源码编译失败证据。页面显示免费额度约 27 天后重置。未查看或更改支付资料、预算、仓库可见性。后续可等额度重置，或由用户明确决定付费预算/公开仓库；本地 Windows 教材工具测试结果仍为 10/10 通过，Flutter/iOS 业务验收仍待进行。
+
+用户选择改为公开仓库以使用免费的标准托管运行器，变更尚未执行。公开前检查了当前源码和 28 次提交中的文件名/补丁：没有发现密钥格式或曾删除的文件；历史提交含作者邮箱，早期文档补丁含本机用户名路径。公开还会让 Actions 历史及日志对所有人可见。已从当前文档删去本机绝对路径，但历史记录不会因此消失。等待公开操作的最终确认；不修改 Actions 预算。
