@@ -35,6 +35,22 @@ jobs:
           persist-credentials: false
       - name: Apply study changes
         run: cp -R ../study/overlay/. .
+      - name: Set study app identity
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          project = Path('ios/Runner.xcodeproj/project.pbxproj')
+          data = project.read_text()
+          assert data.count('com.adilhanney.saber') >= 3
+          assert data.count('INFOPLIST_KEY_CFBundleDisplayName = Saber;') == 3
+          data = data.replace('com.adilhanney.saber', 'com.xiaoxiaoming676.studyapp')
+          data = data.replace('INFOPLIST_KEY_CFBundleDisplayName = Saber;', 'INFOPLIST_KEY_CFBundleDisplayName = Study;')
+          project.write_text(data)
+          plist = Path('ios/Runner/Info.plist')
+          data = plist.read_text()
+          assert data.count('<string>Saber</string>') == 2
+          plist.write_text(data.replace('<string>Saber</string>', '<string>Study</string>'))
+          PY
       - name: Set up pinned Flutter SDK
         run: |
           set -euo pipefail
@@ -53,7 +69,7 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
       - name: Analyze study modules
-        run: flutter analyze lib/data/study lib/components/study
+        run: flutter analyze lib/data/study lib/components/study integration_test/study_flow_test.dart
       - name: Run study tests
         run: flutter test test/study
       - name: Boot available iPhone simulator
