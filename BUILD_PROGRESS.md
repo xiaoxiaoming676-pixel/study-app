@@ -1,4 +1,4 @@
-# 云端构建进度
+# 构建与测试进度
 
 2026-09-17
 
@@ -36,3 +36,9 @@ GitHub 构建记录：https://github.com/xiaoxiaoming676-pixel/study-app/actions
 2026-10-05：第十三次运行 37247985115 及重试均在 GitHub 分配 macOS 运行器前约 6–8 秒失败，步骤 0、runner_id 0、计费时长 0；不能据此判定新代码编译失败。可能与私有仓库 GitHub Actions 额度/账户限制相关，需在账户 Actions/Billing 页面核对具体提示；同时本地核查打包标识替换断言（上游 bundle ID 6 处，显示名配置 3 处，Info.plist 2 处）成立。第十二次归档 IPA 已下载并核验 SHA256，另存为仅供首装排错的未签名临时包，仍保留 Saber 标识且业务集成测试未过。正式 Study 独立标识包待云端运行器恢复后构建。
 
 2026-10-05 用户更正设备条件：当前没有 iPhone、iPad 或其他苹果设备，今天只能拿到 Windows 电脑。已修正安装文档：先查 GitHub Actions 的无运行器失败提示、做 Windows 可执行的源码/教材工具测试；iOS 编译和模拟器继续依赖云端 Mac，签名安装与真机验收延后至有设备/合适远程真机时。先前要求今天用电脑签名安装到本人 iPhone 的步骤不适用。
+
+2026-10-05 Windows 本地接手：在用户电脑 `C:\Users\qqq\Documents` 运行 PowerShell，Python 3.10.7 可用；Git 和 Flutter 命令均未安装或未在 PATH。私有仓库实时 main 为 `ae6b2b480f7ec1e3a74574827a89ea7386431b50`，确认它包含交接检查点 `7454f5076c87976d1c49609bf0d6fd396eea78c9`。已通过仓库连接取回源码；固定 Saber 基线的压缩包下载中断，且本机无 Flutter SDK，所以本轮不能声称完成 Flutter 静态分析、Dart 测试或 iOS 编译。
+
+本机安装了 PowerPoint 16.0，教材工具新增无 LibreOffice 时调用 PowerPoint 导出 PDF 的路径，支持中文文件名，无需改变系统 PowerShell 执行策略。PowerPoint 实际导出的文件以 `%PDF-` 开头；`python -m py_compile` 通过；在本地虚拟环境安装固定的 `python-pptx 1.0.2` 和 `PyMuPDF 1.26.6` 后，`python -m unittest discover -s tools/study -p "test_*.py" -v` 全部 **10/10 通过**，其中包含真实 PPTX 转换和挖空生成。Windows 教材工具可用，但 App 内 PPTX 一键导入仍未完成。
+
+GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作业、0 步、`runner_id=0`、计费 0 毫秒；读取作业日志返回不存在。浏览器入口本轮无法载入 GitHub 页面，仍未取得网页顶部的原始失败提示，暂不能确认是额度、账单还是其他运行器限制。没有修改任何付费设置。用户没有苹果设备，iOS 模拟器完整流程及真机体验仍待云端 Mac 恢复和未来有设备时验证。

@@ -4,13 +4,15 @@
 
 ## 环境
 
-Python 3.10+、LibreOffice（仅 PPTX 转换需要）。
+Python 3.10+。PPTX 转换需要 LibreOffice，或 Windows 上安装的 Microsoft PowerPoint。
 
 ```sh
 python3 -m pip install -r tools/study/requirements.txt
 python3 tools/study/prepare.py lesson.pptx --out lesson-study --color FF0000 --bold --underline
 python3 tools/study/prepare.py lesson.pdf --out pdf-study --keyword 关键词 --color 0000FF
 ```
+
+Windows 上如已安装 PowerPoint，无需另装 LibreOffice。可用 `python` 代替上面命令中的 `python3`；工具会优先使用 LibreOffice，未找到时调用本机 PowerPoint 导出 PDF。
 
 颜色不是固定为红色，可多次传 --color；关键词也可多次传 --keyword。
 规则按“任意匹配（OR）”组合。暂不支持高亮颜色、AI 重点和 OCR。

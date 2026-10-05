@@ -1,18 +1,65 @@
 """Local-only PDF/PPTX cloze preparation. No document is uploaded.
 
-PPTX is rendered by LibreOffice; matching occurs on the rendered PDF so masks
+PPTX is rendered by LibreOffice or Windows PowerPoint; matching uses the PDF so masks
 use real glyph positions. PDF style rules refer to rendered text properties.
 """
 from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 
 import fitz
+
+
+def convert_pptx(source: Path, output: Path, workdir: Path) -> None:
+    """Render a PPTX with LibreOffice or the installed Windows PowerPoint."""
+    executable = shutil.which('soffice') or shutil.which('libreoffice')
+    if executable:
+        profile = (workdir / 'profile').as_uri()
+        subprocess.run([executable, f'-env:UserInstallation={profile}', '--headless',
+                        '--convert-to', 'pdf', '--outdir', str(output.parent), str(source)],
+                       check=True, capture_output=True, text=True, timeout=120)
+    elif os.name == 'nt':
+        powershell = shutil.which('powershell.exe') or shutil.which('pwsh.exe')
+        if not powershell:
+            raise RuntimeError('Install LibreOffice or Microsoft PowerPoint to convert PPTX')
+        script = '''$ErrorActionPreference = 'Stop'
+$powerPoint = $null
+$presentation = $null
+try {
+    $powerPoint = New-Object -ComObject PowerPoint.Application
+    $presentation = $powerPoint.Presentations.Open($env:STUDY_PPTX_INPUT, $true, $false, $false)
+    $presentation.SaveAs($env:STUDY_PDF_OUTPUT, 32)
+} finally {
+    if ($null -ne $presentation) {
+        $presentation.Close()
+        [void][Runtime.InteropServices.Marshal]::ReleaseComObject($presentation)
+    }
+    if ($null -ne $powerPoint) {
+        $powerPoint.Quit()
+        [void][Runtime.InteropServices.Marshal]::ReleaseComObject($powerPoint)
+    }
+}
+'''
+        environment = os.environ.copy()
+        environment['STUDY_PPTX_INPUT'] = str(source)
+        environment['STUDY_PDF_OUTPUT'] = str(output)
+        try:
+            subprocess.run([powershell, '-NoProfile', '-NonInteractive', '-Command', script],
+                           check=True, capture_output=True, text=True, timeout=120,
+                           env=environment)
+        except subprocess.CalledProcessError as error:
+            detail = error.stderr.strip() or error.stdout.strip()
+            raise RuntimeError(f'PowerPoint conversion failed: {detail}') from error
+    else:
+        raise RuntimeError('Install LibreOffice to convert PPTX')
+    if not output.exists():
+        raise RuntimeError('PPTX converter did not produce a PDF')
 
 
 def normalize_pdf(source: Path, output: Path) -> None:
@@ -127,16 +174,8 @@ def prepare(source: Path, output: Path, *, keywords=(), colors=(), bold=False, u
         rendered = source
         if source.suffix.lower() == '.pptx':
             marked, warnings = pptx_marked_text(source, colors, bold, underline)
-            executable = shutil.which('soffice') or shutil.which('libreoffice')
-            if not executable:
-                raise RuntimeError('Install LibreOffice to convert PPTX')
-            profile = (tmp / 'profile').as_uri()
-            subprocess.run([executable, f'-env:UserInstallation={profile}', '--headless',
-                            '--convert-to', 'pdf', '--outdir', str(tmp), str(source)],
-                           check=True, capture_output=True, text=True, timeout=120)
             rendered = tmp / (source.stem + '.pdf')
-            if not rendered.exists():
-                raise RuntimeError('LibreOffice did not produce a PDF')
+            convert_pptx(source, rendered, tmp)
             warnings.append('PPTX 转换依赖电脑字体；请对照原教材检查排版、公式和缺失字体。')
         elif source.suffix.lower() != '.pdf':
             raise ValueError('Only .pptx and .pdf are supported')

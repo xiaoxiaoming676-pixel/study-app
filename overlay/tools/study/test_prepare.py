@@ -63,7 +63,7 @@ class PrepareTests(unittest.TestCase):
     def test_pdf_underline_is_not_silently_guessed(self):
         with self.assertRaises(ValueError):prepare(self.fixture(),self.root/'out',underline=True)
     def test_pptx_conversion_and_explicit_underline(self):
-        source=self.root/'lesson.pptx';prs=Presentation()
+        source=self.root/'教材.pptx';prs=Presentation()
         slide=prs.slides.add_slide(prs.slide_layouts[6])
         box=slide.shapes.add_textbox(Inches(1),Inches(1),Inches(7),Inches(1))
         run=box.text_frame.paragraphs[0].add_run();run.text='UnderlinedAnswer'
@@ -71,10 +71,10 @@ class PrepareTests(unittest.TestCase):
         prs.save(source)
         marked,_=pptx_marked_text(source,underline=True)
         self.assertEqual(marked,[['UnderlinedAnswer']])
-        m=prepare(source,self.root/'out',underline=True)
+        m=prepare(source,self.root/'输出',underline=True)
         self.assertEqual(len(m['pages']),1)
         self.assertGreaterEqual(len(m['pages'][0]['masks']),1)
-        self.assertTrue((self.root/'out/practice.pdf').exists())
+        self.assertTrue((self.root/'输出/practice.pdf').exists())
 
     def test_rotated_and_cropped_pdf_keeps_visible_geometry(self):
         for rotation in [0, 90, 180, 270]:
