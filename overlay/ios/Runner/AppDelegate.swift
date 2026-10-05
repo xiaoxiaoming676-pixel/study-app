@@ -14,7 +14,8 @@ import workmanager_apple
   /// Recognize text locally; keyword and ink-color candidates use page coordinates.
   /// OCR boxes are approximate, so every candidate still needs review.
   private static func recognizeScannedPage(_ page: PDFPage, bounds: CGRect,
-                                           keywords: [String], color: String) -> (text: String, masks: [[String: Any]]) {
+                                           keywords: [String], color: String,
+                                           highlight: Bool) -> (text: String, masks: [[String: Any]]) {
     let longest = max(bounds.width, bounds.height)
     guard longest > 0 else { return ("", []) }
     let scale = min(CGFloat(3), CGFloat(2400) / longest)
@@ -24,8 +25,9 @@ import workmanager_apple
     let width = cgImage.width
     let height = cgImage.height
     let hasColor = color.count == 6 && Int(color, radix: 16) != nil
-    var pixels = hasColor ? [UInt8](repeating: 255, count: width * height * 4) : []
-    if hasColor {
+    let needsPixels = hasColor || highlight
+    var pixels = needsPixels ? [UInt8](repeating: 255, count: width * height * 4) : []
+    if needsPixels {
       pixels.withUnsafeMutableBytes { buffer in
         guard let context = CGContext(data: buffer.baseAddress, width: width, height: height,
           bitsPerComponent: 8, bytesPerRow: width * 4, space: CGColorSpaceCreateDeviceRGB(),
@@ -36,13 +38,17 @@ import workmanager_apple
       }
     }
     let target = Int(color, radix: 16) ?? 0
-    func matchesColor(_ box: CGRect) -> Bool {
-      guard hasColor else { return false }
+    func pixelBounds(_ box: CGRect) -> (Int, Int, Int, Int) {
       let x0 = max(0, Int((box.minX * CGFloat(width)).rounded(.down)))
       let x1 = min(width, Int((box.maxX * CGFloat(width)).rounded(.up)))
       // Vision's origin is lower-left, while the bitmap rows start at the top.
       let y0 = max(0, Int(((1 - box.maxY) * CGFloat(height)).rounded(.down)))
       let y1 = min(height, Int(((1 - box.minY) * CGFloat(height)).rounded(.up)))
+      return (x0, x1, y0, y1)
+    }
+    func matchesColor(_ box: CGRect) -> Bool {
+      guard hasColor else { return false }
+      let (x0, x1, y0, y1) = pixelBounds(box)
       guard x1 > x0, y1 > y0 else { return false }
       let red = (target >> 16) & 255
       let green = (target >> 8) & 255
@@ -61,6 +67,24 @@ import workmanager_apple
         }
       }
       return ink >= 8 && matched >= 8 && matched * 3 >= ink
+    }
+    func matchesHighlight(_ box: CGRect) -> Bool {
+      guard highlight else { return false }
+      let (x0, x1, y0, y1) = pixelBounds(box)
+      guard x1 > x0, y1 > y0 else { return false }
+      var brightColor = 0
+      let area = (x1 - x0) * (y1 - y0)
+      for y in y0..<y1 {
+        for x in x0..<x1 {
+          let offset = (y * width + x) * 4
+          let r = Int(pixels[offset]), g = Int(pixels[offset + 1]), b = Int(pixels[offset + 2])
+          let light = r + g + b > 450
+          let saturated = max(r, g, b) - min(r, g, b) > 45
+          if light && saturated { brightColor += 1 }
+        }
+      }
+      // A background occupies much more of the OCR box than colored glyphs.
+      return brightColor >= 16 && brightColor * 3 >= area
     }
     let request = VNRecognizeTextRequest()
     request.recognitionLevel = .accurate
@@ -91,7 +115,7 @@ import workmanager_apple
     for observation in observations {
       guard let recognized = observation.topCandidates(1).first else { continue }
       lines.append(recognized.string)
-      if matchesColor(observation.boundingBox) {
+      if matchesColor(observation.boundingBox) || matchesHighlight(observation.boundingBox) {
         add(observation.boundingBox, answer: recognized.string)
       }
       for keyword in keywords where !keyword.isEmpty {
@@ -200,7 +224,7 @@ import workmanager_apple
           let extractedText = page.string ?? ""
           let scan = extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             ? Self.recognizeScannedPage(page, bounds: bounds, keywords: keywords,
-                color: wantedColor) : (text: "", masks: [[String: Any]]())
+                color: wantedColor, highlight: highlight) : (text: "", masks: [[String: Any]]())
           let text = scan.text.isEmpty ? extractedText : scan.text
           var masks: [[String: Any]] = scan.masks
           var seen = Set<String>()

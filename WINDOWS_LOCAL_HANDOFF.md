@@ -50,3 +50,7 @@ GitHub Actions 运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/stu
 [iPhone + iPad 运行 37319109435](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37319109435) 随后整体绿色通过，两种模拟器的业务测试均为 `+1: All tests passed!`。最新无签名包为 [归档 11351295695](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37319109435/artifacts/11351295695)，有效期至 2026-10-19 14:15 UTC。上段“iPad 待验证”是当时进度，以本段结果为准。真机、签名和 App 内 PPTX 直接导入仍未完成。
 
 用户在电脑端的新本地任务可以引用本文件，并要求直接继续实施。
+
+## 2026-10-06 凌晨进度
+
+[运行 37334090670](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37334090670) 在 iPhone、iPad 双模拟器整体绿色通过，覆盖已保存 PDF 与导入源逐字节相同，以及原文版、挖空版、笔记答题版三种 PDF 导出。上一轮曾在 PDFium 加载时失败一次，本轮未复现，后续继续观察。[最新绿色无签名归档 11356863783](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37334090670/artifacts/11356863783)，有效期至 2026-10-19 16:12 UTC。Windows 本地教材工具再次 10/10 通过。正在新增扫描页彩色浅底高亮候选与模拟器对照测试，尚待云端验证。用户仍无苹果设备；App 内 PPTX 一键导入、签名和真机验收仍未完成。

@@ -90,6 +90,8 @@ void main() {
       textDirection: TextDirection.ltr,
     )..layout();
     label.paint(rasterCanvas, const Offset(75, 75));
+    rasterCanvas.drawRect(const Rect.fromLTWH(65, 185, 260, 85),
+        Paint()..color = Colors.yellow);
     final otherLabel = TextPainter(
       text: const TextSpan(text: 'Beta', style: TextStyle(fontSize: 72, color: Colors.black)),
       textDirection: TextDirection.ltr,
@@ -119,6 +121,15 @@ void main() {
         isTrue);
     expect(colorMasks.any((mask) => (mask as Map)['answer'].toString().contains('Beta')),
         isFalse, reason: 'Black scan text must not match red ink');
+    final highlightResult = await channel.invokeMapMethod<String, dynamic>('analyze', {
+      'bytes': scannedPdf, 'page': 0, 'keywords': <String>[],
+      'bold': false, 'underline': false, 'highlight': true, 'color': '',
+    });
+    final highlightMasks = (highlightResult?['masks'] as List?) ?? [];
+    expect(highlightMasks.any((mask) => (mask as Map)['answer'].toString().contains('Beta')),
+        isTrue, reason: 'Black text on a yellow scanned highlight should be selected');
+    expect(highlightMasks.any((mask) => (mask as Map)['answer'].toString().contains('Alpha')),
+        isFalse, reason: 'Red text on white should not count as a highlight');
 
     await tester.tap(find.byTooltip('学习：挖空与朗读'));
     await waitFor(tester, find.byType(StudyPanel));

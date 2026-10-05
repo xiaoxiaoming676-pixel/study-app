@@ -180,9 +180,9 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
           TextField(decoration: const InputDecoration(labelText: '字体颜色（可选）', hintText: '例如 FF0000，不限红色'), onChanged: (v) { color = v; }),
           CheckboxListTile(title: const Text('加粗'), value: bold, onChanged: (v) => update(() { bold = v!; })),
           CheckboxListTile(title: const Text('下划线'), value: underline, onChanged: (v) => update(() { underline = v!; })),
-          CheckboxListTile(title: const Text('PDF 高亮批注'), value: highlight, onChanged: (v) => update(() { highlight = v!; })),
+          CheckboxListTile(title: const Text('高亮（PDF 批注或扫描页彩色浅底）'), value: highlight, onChanged: (v) => update(() { highlight = v!; })),
           SwitchListTile(title: const Text('应用到整本教材'), value: whole, onChanged: (v) => update(() { whole = v; })),
-          const Text('任一条件匹配即列为候选。扫描页支持关键词和字体颜色的近似识别；扫描图中的加粗、下划线及高亮仍需手动框选。请逐项预览后保存。'),
+          const Text('任一条件匹配即列为候选。扫描页支持关键词、字体颜色及彩色浅底高亮的近似识别；扫描图中的加粗、下划线仍需手动框选。请逐项预览后保存。'),
           FilledButton(onPressed: () { FocusScope.of(context).unfocus(); Navigator.pop(context, true); }, child: const Text('生成候选')),
         ])),
       ))));
