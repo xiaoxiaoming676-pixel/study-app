@@ -32,3 +32,5 @@ GitHub 构建记录：https://github.com/xiaoxiaoming676-pixel/study-app/actions
 2026-10-05：第十一次运行 37244200086 的学习模块静态分析、9/9 单元测试、无签名 iOS 正式包构建与归档通过；模拟器集成测试未启动业务流程，因测试辅助语句 `await tester.testTextInput.hide()` 对返回 void 的方法使用 await 导致 Dart 编译失败。已删除 await，下一轮需要重新验证挖空候选确认、笔记、朗读与重开。该轮归档 11319380910 仍未签名，不能直接安装到用户 iPhone。
 
 2026-10-05：第十二次运行 37246129034 通过静态分析、9/9 单元测试、无签名 iOS 构建和归档；模拟器业务测试在辅助代码 TestTextInput.hide() 处失败，因为真机式 integration_test 未注册该假键盘，尚未到候选保存。改用 FocusManager 收起真实界面焦点；工作流增加集成测试静态分析及独立 Study 名称/包标识，Windows 首装指引改为选择绿色构建并逐项实测。下一轮须重新验证。
+
+2026-10-05：第十三次运行 37247985115 及重试均在 GitHub 分配 macOS 运行器前约 6–8 秒失败，步骤 0、runner_id 0、计费时长 0；不能据此判定新代码编译失败。可能与私有仓库 GitHub Actions 额度/账户限制相关，需在账户 Actions/Billing 页面核对具体提示；同时本地核查打包标识替换断言（上游 bundle ID 6 处，显示名配置 3 处，Info.plist 2 处）成立。第十二次归档 IPA 已下载并核验 SHA256，另存为仅供首装排错的未签名临时包，仍保留 Saber 标识且业务集成测试未过。正式 Study 独立标识包待云端运行器恢复后构建。

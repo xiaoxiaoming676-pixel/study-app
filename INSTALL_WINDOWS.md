@@ -8,6 +8,10 @@
 2. 在 Windows PowerShell 进入文件夹运行 `Get-FileHash .\Study-UNSIGNED.ipa -Algorithm SHA256`，与 `SHA256.txt` 对照。该包未签名，直接点开不会装到 iPhone。
 3. 如需确认名称和包标识，可解压 IPA，查看 `Payload/Runner.app/Info.plist`；签名工具可能在安装时调整实际标识，请记录最终值。
 
+## GitHub 构建暂时受阻时的临时包
+
+2026-10-05：第十三次运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37247985115) 两次均在分配运行器前失败（0 步、0 计费毫秒），原因尚须在仓库拥有者的 Actions 页面核对，不能称为源码编译失败。若今天只需验证电脑签名/手机安装流程，可下载[第十二次无签名产物](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37246129034/artifacts/11319767491)。IPA SHA256：`63b79316f4ebbd35a2ed6460467c8fef719fa39f1949c0f7afaef9bc7fb91b85`。这版仍是上游 Saber 标识，模拟器端到端测试未通过（测试辅助方法异常）；仅用于无敏感资料的临时排错。未来独立 Study 包不会直接覆盖它，测试笔记须先导出备份。
+
 ## Windows 电脑签名安装
 
 1. 从 [Sideloadly 官网](https://sideloadly.io/)下载 Windows 版，并按其当前指引安装所需的 Apple 组件。只从官方页面获取工具。
