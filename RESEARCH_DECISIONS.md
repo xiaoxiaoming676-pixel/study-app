@@ -12,12 +12,12 @@
 | LibreOffice 转换服务 | [LibreOffice](https://www.libreoffice.org/) / [unoserver](https://github.com/unoconv/unoserver) 可在服务器端把 PPTX 渲染为 PDF。GitHub Actions 可编译 App，但不是应用运行时的文档服务。 | 如需 App 内一键导入 PPTX 且版式较完整，可另设经过授权、带隐私/存储策略的服务；需要可持续部署与费用。暂不上传教材到未经用户选择的服务器。 |
 | 浏览器 PPTX 渲染 | [pptx-renderer](https://github.com/aiden0z/pptx-renderer) Apache 2.0，能读取并在浏览器绘制部分 PowerPoint 内容，但格式覆盖与 PDF 坐标输出不完整。 | 不宜直接当高保真教材转换核心；可后续针对少量受支持演示文稿做试验。 |
 | 新发现的离线 PPTX 路线 | [DocReader](https://github.com/germanhl36/DocReader) 虽能输出 PDF，但源码只绘文字框和统一背景，测试只验 PDF 文件头；[offline_document_viewer](https://github.com/huseyiniriss/offline_document_viewer) 主要提供预览；[Pagus](https://github.com/pagus-kit/Pagus) 可输出 SVG，需结合 [WebKit PDF 导出](https://developer.apple.com/documentation/webkit/wkwebview/createpdf%28configuration%3Acompletionhandler%3A%29) 做质量原型。 | 不把文字重绘或预览冒充可书写的完整 PPTX 导入。详细核对与验证门槛见 [PPTX_EVALUATION.md](PPTX_EVALUATION.md)。 |
-| iOS 云端测试 | [Flutter integration_test](https://docs.flutter.dev/testing/integration-tests) 可在 GitHub Actions macOS 启动模拟器运行功能流程；[BrowserStack](https://www.browserstack.com/docs/app-automate/appium/resign-ios-apps) 和 [Sauce Labs](https://docs.saucelabs.com/mobile-apps/mobile-faq/) 提供远程真机，上传格式和签名要求须满足。 | [2026-10-05 绿色运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37271995174) 已通过模拟器导入、笔迹、挖空、笔记、朗读及重开流程；真机平台不能解决无签名应用直接安装到用户手机。 |
+| iOS 云端测试 | [Flutter integration_test](https://docs.flutter.dev/testing/integration-tests) 可在 GitHub Actions macOS 启动模拟器运行功能流程；[BrowserStack](https://www.browserstack.com/docs/app-automate/appium/resign-ios-apps) 和 [Sauce Labs](https://docs.saucelabs.com/mobile-apps/mobile-faq/) 提供远程真机，上传格式和签名要求须满足。 | [2026-10-06 绿色运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37345346944) 已在 iPhone、iPad 模拟器通过导入、笔迹、挖空、扫描页颜色与浅底高亮、笔记、朗读、导出及重开流程；真机平台不能解决无签名应用直接安装到用户手机。 |
 | 发布签名 | [Apple 个人团队](https://developer.apple.com/help/account/basics/about-your-developer-account/) 与 [分发文档](https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/) 规定签名和 TestFlight 资格；[SideStore](https://docs.sidestore.io/docs/installation/prerequisites/) 首装依赖电脑。 | 用户有 Windows 电脑、无苹果设备与开发者会员；可继续产出无签名构建，暂不能完成真机安装验收或提供可直接安装的 iPhone IPA。 |
 
 ## 选择
 
-继续基于 Saber 开发，并保留 PDF、笔迹和离线文件引擎。iPhone 模拟器端到端流程已通过；真机验收仍待将来有设备和签名条件时进行。PPTX 目前可在 Windows 用本地 PowerPoint 转为 PDF；将来有 iPhone 时也可用 Keynote 导出 PDF。若要求 App 内一步完成且版式较完整，受控 LibreOffice 转换服务是较稳妥的工程方向，但需要持续运行的主机、教材上传前的明确授权、隐私和删除策略；本仓库现阶段没有这类服务或苹果分发签名。扫描图按关键词及指定 RGB 字体颜色 OCR 已在模拟器验证；图中加粗、下划线、高亮和语义重点识别仍是后续缺口。
+继续基于 Saber 开发，并保留 PDF、笔迹和离线文件引擎。iPhone、iPad 模拟器端到端流程已通过；真机验收仍待将来有设备和签名条件时进行。PPTX 目前可在 Windows 用本地 PowerPoint 转为 PDF；将来有 iPhone 时也可用 Keynote 导出 PDF。若要求 App 内一步完成且版式较完整，受控 LibreOffice 转换服务是较稳妥的工程方向，但需要持续运行的主机、教材上传前的明确授权、隐私和删除策略；本仓库现阶段没有这类服务或苹果分发签名。扫描图按关键词、指定 RGB 字体颜色及彩色浅底高亮生成 OCR 候选已在双模拟器验证；图中加粗、下划线和语义重点识别仍是后续缺口。
 
 ## 开源维护快照（2026-10-03）
 
