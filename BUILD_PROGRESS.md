@@ -34,3 +34,5 @@ GitHub 构建记录：https://github.com/xiaoxiaoming676-pixel/study-app/actions
 2026-10-05：第十二次运行 37246129034 通过静态分析、9/9 单元测试、无签名 iOS 构建和归档；模拟器业务测试在辅助代码 TestTextInput.hide() 处失败，因为真机式 integration_test 未注册该假键盘，尚未到候选保存。改用 FocusManager 收起真实界面焦点；工作流增加集成测试静态分析及独立 Study 名称/包标识，Windows 首装指引改为选择绿色构建并逐项实测。下一轮须重新验证。
 
 2026-10-05：第十三次运行 37247985115 及重试均在 GitHub 分配 macOS 运行器前约 6–8 秒失败，步骤 0、runner_id 0、计费时长 0；不能据此判定新代码编译失败。可能与私有仓库 GitHub Actions 额度/账户限制相关，需在账户 Actions/Billing 页面核对具体提示；同时本地核查打包标识替换断言（上游 bundle ID 6 处，显示名配置 3 处，Info.plist 2 处）成立。第十二次归档 IPA 已下载并核验 SHA256，另存为仅供首装排错的未签名临时包，仍保留 Saber 标识且业务集成测试未过。正式 Study 独立标识包待云端运行器恢复后构建。
+
+2026-10-05 用户更正设备条件：当前没有 iPhone、iPad 或其他苹果设备，今天只能拿到 Windows 电脑。已修正安装文档：先查 GitHub Actions 的无运行器失败提示、做 Windows 可执行的源码/教材工具测试；iOS 编译和模拟器继续依赖云端 Mac，签名安装与真机验收延后至有设备/合适远程真机时。先前要求今天用电脑签名安装到本人 iPhone 的步骤不适用。

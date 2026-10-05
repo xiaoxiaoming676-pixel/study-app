@@ -1,6 +1,6 @@
-# 没有电脑时的交付路径
+# 无苹果设备时的开发与交付路径
 
-核查日期：2026-10-02。
+核查日期：2026-10-02；2026-10-05 更正：用户当前没有 iPhone、iPad 或其他苹果设备，Windows 电脑将于今天可用。以下 iPhone 安装路径仅作为将来设备可用时的参考。当前优先解决云端运行器与模拟器验收，并在 Windows 运行教材转换和 Flutter 测试。
 
 ## 构建和教材准备
 
@@ -17,6 +17,6 @@ GitHub Actions 已在云端 macOS 编译无签名 iOS IPA，不需要用户电�
 - 欧盟第三方商店与网页分发也要求开发者会员、苹果公证和许可条件；它们不是给一个新无签名 IPA 免费安装的入口。
 - 假如用户的手机已经安装并配置过 SideStore 一类签名工具，可以用手机导入现有 IPA，具体能力依赖设备现状；当前未知。
 
-结论：用户暂时没有电脑，也没有付费开发者账号时，可以继续线上开发和生成无签名 IPA，但无法保证从零开始仅用网页把它签名并装到任意 iPhone。不要把未经证实的共享企业证书、在线代签网站当作可长期使用的正式交付。下次能接触电脑时，可按 [INSTALL_WINDOWS.md](INSTALL_WINDOWS.md) 用个人账号安装；另一条是先开通开发者会员，再走 TestFlight。
+结论：用户暂时没有电脑，也没有付费开发者账号时，可以继续线上开发和生成无签名 IPA，但无法保证从零开始仅用网页把它签名并装到任意 iPhone。不要把未经证实的共享企业证书、在线代签网站当作可长期使用的正式交付。当前可按 [INSTALL_WINDOWS.md](INSTALL_WINDOWS.md) 的 Windows 开发验证部分排查构建并运行跨平台测试。以后有 iPhone/iPad 时才需要签名安装和真机验证；正式分发还需符合 Apple 的开发者与发布条件。
 
 参考：[Apple 免费个人团队](https://developer.apple.com/help/account/basics/about-your-developer-account/)、[SideStore 首次安装要求](https://docs.sidestore.io/docs/installation/prerequisites)、[Apple 欧盟网页分发](https://developer.apple.com/support/web-distribution-eu/)、[Apple Keynote iPhone](https://support.apple.com/en-gb/guide/keynote-iphone/tan72232b56/ios)、[Apple Pages iPhone](https://support.apple.com/en-ke/guide/pages-iphone/tancdeedb11c/ios)。
