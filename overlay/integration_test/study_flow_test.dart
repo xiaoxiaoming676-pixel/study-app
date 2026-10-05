@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:saber/components/canvas/image/editor_image.dart';
 import 'package:saber/components/study/study_panel.dart';
 import 'package:saber/data/editor/editor_core_info.dart';
 import 'package:saber/data/file_manager/file_manager.dart';
@@ -149,6 +150,13 @@ void main() {
     expect(saved.pages.first.strokes, isNotEmpty);
     expect(saved.pages.first.cloze.masks.single.answer, 'Alpha');
     expect(saved.pages.first.cloze.note, '这段需要复习');
+
+    // Verify that the PDF asset survived note serialization byte for byte.
+    // This distinguishes a damaged save from a PDF renderer failure.
+    final persistedPdf = saved.pages.first.backgroundImage as PdfEditorImage;
+    expect(persistedPdf.pdfFile, isNotNull);
+    final persistedBytes = await persistedPdf.pdfFile!.readAsBytes();
+    expect(persistedBytes, bytes, reason: 'Saved PDF asset differs from import');
 
     // Generate every study PDF variant from the persisted note, including
     // the Chinese long-term note page in the annotated export.
