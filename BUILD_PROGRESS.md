@@ -42,3 +42,5 @@ GitHub 构建记录：https://github.com/xiaoxiaoming676-pixel/study-app/actions
 本机安装了 PowerPoint 16.0，教材工具新增无 LibreOffice 时调用 PowerPoint 导出 PDF 的路径，支持中文文件名，无需改变系统 PowerShell 执行策略。PowerPoint 实际导出的文件以 `%PDF-` 开头；`python -m py_compile` 通过；在本地虚拟环境安装固定的 `python-pptx 1.0.2` 和 `PyMuPDF 1.26.6` 后，`python -m unittest discover -s tools/study -p "test_*.py" -v` 全部 **10/10 通过**，其中包含真实 PPTX 转换和挖空生成。Windows 教材工具可用，但 App 内 PPTX 一键导入仍未完成。
 
 GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作业、0 步、`runner_id=0`、计费 0 毫秒；读取作业日志返回不存在。浏览器入口本轮无法载入 GitHub 页面，仍未取得网页顶部的原始失败提示，暂不能确认是额度、账单还是其他运行器限制。没有修改任何付费设置。用户没有苹果设备，iOS 模拟器完整流程及真机体验仍待云端 Mac 恢复和未来有设备时验证。
+
+提交 `bdd2dd9ac623117627e0c9850f0fa6a962fa4149` 已把上述 Windows PowerPoint 转换、中文路径回归测试及本地 10/10 测试证据推送至 main。它触发的 [第十四次 iOS 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37260329062) 再次于约 8 秒后失败：0 步、`runner_id=0`、macOS 计费 0 毫秒；新代码仍未进入云端编译。已新增独立的 Windows Flutter 静态分析和学习单元测试工作流，以尝试在无 Mac 运行器时取得 Dart 结果；其 YAML 已在本机解析，运行结果待核对。GitHub 网页在未登录状态对私有仓库显示 404，已打开登录页供仓库拥有者查看原始提示。

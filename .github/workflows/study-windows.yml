@@ -1,0 +1,57 @@
+name: Validate Study on Windows
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'overlay/**'
+      - '.github/workflows/study-windows.yml'
+      - 'BASE_COMMIT.txt'
+permissions:
+  contents: read
+jobs:
+  flutter:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+        working-directory: source
+    steps:
+      - name: Enable long Git paths
+        shell: bash
+        working-directory: .
+        run: git config --global core.longpaths true
+      - name: Checkout study changes
+        uses: actions/checkout@v7
+        with:
+          path: study
+          persist-credentials: false
+      - name: Checkout pinned Saber source
+        uses: actions/checkout@v7
+        with:
+          repository: saber-notes/saber
+          ref: 5b396a40406c75835741f5c4555bc10ae816f121
+          path: source
+          persist-credentials: false
+      - name: Apply study changes
+        run: cp -R ../study/overlay/. .
+      - name: Set up pinned Flutter SDK
+        run: |
+          set -euo pipefail
+          git submodule update --init --depth 1 submodules/flutter
+          git -C submodules/flutter switch -C stable
+          flutter_revision=$(git -C submodules/flutter rev-parse HEAD)
+          flutter_tag=$(git -C submodules/flutter ls-remote --tags origin | awk -v c="$flutter_revision" '$1 == c {sub(/refs\/tags\//, "", $2); print $2}')
+          if [ -n "$flutter_tag" ]; then
+            git -C submodules/flutter tag -f "$flutter_tag"
+          fi
+          echo "$(cygpath -w "$PWD/submodules/flutter/bin")" >> "$GITHUB_PATH"
+      - name: Record Flutter version
+        run: flutter --version
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Analyze study modules
+        run: flutter analyze lib/data/study lib/components/study integration_test/study_flow_test.dart
+      - name: Run study tests
+        run: flutter test test/study
