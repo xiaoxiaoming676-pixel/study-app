@@ -103,7 +103,9 @@ void main() {
 
     await tester.tap(find.byTooltip('学习：挖空与朗读'));
     await waitFor(tester, find.byType(StudyPanel));
-    await tester.tap(find.text('挖空').last);
+    final clozeTab = find.text('挖空').last.hitTestable();
+    await waitFor(tester, clozeTab);
+    await tester.tap(clozeTab);
     await waitFor(tester, find.text('自动挖空'));
     await tester.tap(find.text('自动挖空'));
     await waitFor(tester, find.text('生成候选'));

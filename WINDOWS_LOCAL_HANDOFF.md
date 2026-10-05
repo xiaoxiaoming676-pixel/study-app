@@ -26,6 +26,8 @@ GitHub Actions 运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/stu
 
 [公开后的 Windows 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267237712) 已在实际托管运行器上通过：Flutter 学习模块静态检查无问题，9/9 项单元测试通过。[iOS 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267208722) 静态检查、9/9 项单元测试、无签名编译和归档上传成功，但模拟器端到端测试失败，整条工作流为红色。模拟器实际执行了 PDF 导入、手指书写、保存、OCR、挖空、长期笔记和朗读；测试脚本在关闭并重新打开笔记后点中了不可命中的旧 Tooltip，未完成重开后的 UI 断言。已改为等待可命中的学习按钮，下一轮重跑。步骤列表因 `continue-on-error` 显示 `conclusion=success`，必须查看日志和最终工作流结论。此前的零步骤故障是私有仓库免费分钟用尽所致。
 
+[第二轮 Windows 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37269586628) 再次通过。[第二轮 iOS 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37269586591) 再次通过分析、9/9 单元测试、无签名编译和上传，但模拟器测试在进入“挖空”标签时点击了仍在页面滑入动画中的控件，坐标超出 iPhone 模拟器屏幕，未到达“自动挖空”，整条工作流仍为红色。已让测试等待“挖空”标签可命中后再点击；第三轮需检查完整日志和最终结论。不能将这两次失败轮次的无签名包作为已验收版。
+
 ## 本次 Windows 本地结果
 
 任务运行在用户电脑 Documents 目录的 PowerShell；Python 3.10.7 和 PowerPoint 16.0 可用，Git/Flutter 命令不在 PATH。仓库源码通过 GitHub 连接取得；Git 与固定 Saber 源码压缩包的下载因网络慢/中断未完成。已给 `overlay/tools/study/prepare.py` 增加 Windows PowerPoint PDF 转换路径，完整的 Python 教材工具测试 **10/10 通过**，含中文文件名 PPTX 转换、挖空和 PDF 几何/批注测试；Python 语法编译通过。本机未运行 Flutter 静态分析、Dart 测试、Xcode 或 iOS 模拟器。不要把 Windows 教材工具通过视为 App 业务流程通过。
