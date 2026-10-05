@@ -15,6 +15,7 @@ import 'package:saber/data/flavor_config.dart';
 import 'package:saber/data/prefs.dart';
 import 'package:saber/data/routes.dart';
 import 'package:saber/data/sentry/sentry_init.dart';
+import 'package:saber/data/study/study_exporter.dart';
 import 'package:saber/main.dart' as saber;
 import 'package:saber/pages/editor/editor.dart';
 import 'package:saber/pages/home/home.dart';
@@ -148,6 +149,15 @@ void main() {
     expect(saved.pages.first.strokes, isNotEmpty);
     expect(saved.pages.first.cloze.masks.single.answer, 'Alpha');
     expect(saved.pages.first.cloze.note, '这段需要复习');
+
+    // Generate every study PDF variant from the persisted note, including
+    // the Chinese long-term note page in the annotated export.
+    for (final mode in StudyExportMode.values) {
+      final exported = await StudyExporter.generate(saved, mode);
+      expect(exported.length, greaterThan(1000), reason: '$mode is empty');
+      expect(exported.sublist(0, 4), [0x25, 0x50, 0x44, 0x46],
+          reason: '$mode is not a PDF');
+    }
 
     await tester.tap(find.text('听读').last);
     await waitFor(tester, find.text('从保存位置朗读'));
