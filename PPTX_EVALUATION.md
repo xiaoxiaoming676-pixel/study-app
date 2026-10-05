@@ -10,6 +10,8 @@
 | [DocReader](https://github.com/germanhl36/DocReader) 原生 Swift | 源码中的 `OOXMLSlideParser` 仅抽取文字框；`SlidePageRenderer` 把所有页绘为固定深色底、白字、两种固定字体；测试只断言输出以 `%PDF` 开头。要求 iOS 16+，而现有 App 最低 iOS 15。 | 会丢失课件图片、公式、图表、主题与字体，不集成到正式教材路径。 |
 | [offline_document_viewer](https://github.com/huseyiniriss/offline_document_viewer) | 内置 PPTXjs 的离线 Flutter 预览，文档说明对图表和自动缩字有限制；未提供导出可直接用于本 App 的逐页 PDF API。 | 可以研究预览适配，先用真实课件核对清晰度、性能与 PDF 导出，再考虑接入。 |
 | [Pagus](https://github.com/pagus-kit/Pagus) + WebKit | 可在浏览器内把 PPTX 解析为 SVG/DOM；[WKWebView.createPDF](https://developer.apple.com/documentation/webkit/wkwebview/createpdf%28configuration%3Acompletionhandler%3A%29)可导出网页 PDF。Pagus 使用 `<foreignObject>` 和字体替换，复杂公式及版式需要实测。 | 有希望形成离线转换原型，但目前尚未验证多页纸张尺寸、文字可选性、字体、公式与内存；不可直接称为高保真导入。 |
+| [office-kit/pptx](https://github.com/office-kit/pptx) 浏览器预览 | 能读 PPTX 并用伴随预览包输出 SVG/PNG；项目自己的说明明确其预览并非像素精确，建议印刷级输出使用 PowerPoint 或 LibreOffice。尚无本 App 所需的离线多页 PDF 与坐标验收。 | 可作为离线原型候选，不直接替换现有教材导入。 |
+| [900Slides](https://github.com/900Labs/900Slides) 桌面工具 | 文档称可在桌面本地把 PPTX 导出 PDF，也明确各平台安装和发布产物仍需验证；不是 iOS 应用内的转换组件。 | 对没有 PowerPoint 的电脑可另行评估；本机已有 PowerPoint 转换路径，不改变手机端结论。 |
 | Microsoft OneDrive / Graph 转换 | [Microsoft Graph](https://learn.microsoft.com/en-us/graph/api/driveitem-get-content-format?view=graph-rest-beta)列出 PPTX → PDF；需要先把用户文件放到其云端并完成账号授权。 | 用户未选择云端教材存储，不主动上传私有教材。 |
 | LibreOffice / unoserver | 可在持续运行的服务端转换；本仓库无经授权的文档服务和存储策略。 | 若将来选择云端路线，须先确定主机、成本、上传同意、保留/删除策略，再做应用接入。 |
 
