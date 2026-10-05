@@ -47,4 +47,6 @@ GitHub Actions 运行 [37247985115](https://github.com/xiaoxiaoming676-pixel/stu
 
 [最新 iPhone 模拟器运行 37300523342](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37300523342) 与 [Windows 运行 37300523370](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37300523370) 整体绿色通过。模拟器流程已新增扫描页按 `#F44336` 识别红字 Alpha 并排除黑字 Beta；OCR 颜色是近似候选，仍需人工复核。新无签名包为 [归档 11343632694](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37300523342/artifacts/11343632694)，有效期至 2026-10-19 12:00 UTC。研究并排除会丢失课件版式的 DocReader 路线，离线 PPTX 其他候选及门槛见 [PPTX_EVALUATION.md](PPTX_EVALUATION.md)。iPad 模拟器回归已加入工作流，结果待下一轮；无苹果设备，真机与签名安装仍未完成。
 
+[iPhone + iPad 运行 37319109435](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37319109435) 随后整体绿色通过，两种模拟器的业务测试均为 `+1: All tests passed!`。最新无签名包为 [归档 11351295695](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37319109435/artifacts/11351295695)，有效期至 2026-10-19 14:15 UTC。上段“iPad 待验证”是当时进度，以本段结果为准。真机、签名和 App 内 PPTX 直接导入仍未完成。
+
 用户在电脑端的新本地任务可以引用本文件，并要求直接继续实施。
