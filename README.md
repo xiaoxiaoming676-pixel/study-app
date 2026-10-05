@@ -4,9 +4,9 @@
 
 ## 当前可下载版本
 
-[2026-10-02 云端构建](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/36944871735) 已通过 Flutter 学习模块静态分析、9 项测试和 Xcode 无签名 iOS 构建；增加扫描 PDF 本地文字识别供朗读（尚未真机验收）。Artifacts 中的 `Study-unsigned-iOS-app` 含 `Study-UNSIGNED.ipa`。该 IPA 需要使用个人 Apple 账号签名才能在 iPhone 安装；它尚未经真机验收，也不是功能完整的正式版。
+[2026-10-05 绿色云端构建](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37271995174) 已通过 Flutter 学习模块静态分析、9 项单元测试、iPhone 模拟器学习流程测试和 Xcode 无签名 iOS 构建。[构建产物](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37271995174/artifacts/11329312423) 含 `Study-UNSIGNED.ipa` 与其 SHA256 清单，有效期至 2026-10-19 06:47 UTC。IPA 必须签名后才能安装；目前用户没有苹果设备，尚未进行真机验收，也不是功能完整的正式版。Windows 教材工具的 PowerPoint 转 PDF 及 Python 测试 10/10 通过，App 内 PPTX 直接导入仍未完成。
 
-- Windows + iPhone 自用安装：[INSTALL_WINDOWS.md](INSTALL_WINDOWS.md)。
+- Windows 验证与将来有 iPhone 时的自用安装：[INSTALL_WINDOWS.md](INSTALL_WINDOWS.md)。
 - 稳定测试与正式交付路径、功能缺口：[RELEASE_OPTIONS.md](RELEASE_OPTIONS.md)。
 - 可核对的构建证据：[BUILD_PROGRESS.md](BUILD_PROGRESS.md)。
 - 暂时没有电脑时的实际限制与 iPhone 文档转换：[PHONE_ONLY.md](PHONE_ONLY.md)。

@@ -8,7 +8,7 @@
 
 1. 先前的零步骤失败是私有仓库免费分钟 2,000/2,000 用尽且 Actions 预算为 $0 所致。用户确认后仓库已公开，标准托管运行器已能启动；未修改预算或支付资料。
 2. Windows 本地 PowerPoint 教材转换及 Python 工具测试 10/10 通过。[公开后的 Windows Flutter 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267237712) 静态检查无问题，9/9 项学习模块测试通过。
-3. [第一轮公开后的 iOS 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37267208722) 静态检查、9/9 项单元测试、无签名编译和上传通过，但模拟器端到端测试在关闭并重开笔记后的工具栏点击失败。[第二轮](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37269586591) 在“挖空”标签仍滑入屏幕时过早点击，模拟器测试也未通过；两个工作流均为红色。已让测试等待这两处控件可命中，待下一轮重跑；仅在整条工作流绿色通过后使用它的无签名产物。Windows 本机不能运行 Xcode iOS 模拟器或完成 iOS 构建。
+3. [最新 iOS 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37271995174) 已整体绿色通过：静态检查、9/9 项单元测试、iPhone 模拟器完整学习流程测试和无签名编译/上传均通过。可在 Artifacts 获取最新 [Study-unsigned-iOS-app](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37271995174/artifacts/11329312423)，归档有效期至 2026-10-19 06:47 UTC。用户目前没有苹果设备，不需要下载或尝试安装；Windows 本机不能运行 Xcode iOS 模拟器或完成 iOS 构建。
 4. PPTX 可先在 Windows 的 PowerPoint 或 LibreOffice 导出 PDF 检查教材版式；App 内直接导入 PPTX 仍需继续开发。
 
 下面的 IPA、签名和真机步骤保留给将来有 iPhone/iPad 时使用。现在不用安装 Sideloadly，不用准备 Apple ID 签名，也不用购买苹果设备来完成本阶段的软件检查。
