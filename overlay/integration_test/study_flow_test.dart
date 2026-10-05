@@ -110,6 +110,7 @@ void main() {
       'bytes': scannedPdf, 'page': 0, 'keywords': <String>[],
       'bold': false, 'underline': false, 'highlight': false, 'color': 'FF0000',
     });
+    expect(colorResult?['text'], contains('Alpha'));
     final colorMasks = (colorResult?['masks'] as List?) ?? [];
     expect(colorMasks, isNotEmpty, reason: 'Red scan text should be detected');
     expect(colorMasks.any((mask) => (mask as Map)['answer'].toString().contains('Alpha')),

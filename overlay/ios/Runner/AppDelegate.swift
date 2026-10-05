@@ -23,14 +23,15 @@ import workmanager_apple
     guard let cgImage = image.cgImage else { return ("", []) }
     let width = cgImage.width
     let height = cgImage.height
-    var pixels = [UInt8](repeating: 255, count: width * height * 4)
     let hasColor = color.count == 6 && Int(color, radix: 16) != nil
+    var pixels = hasColor ? [UInt8](repeating: 255, count: width * height * 4) : []
     if hasColor {
       pixels.withUnsafeMutableBytes { buffer in
         guard let context = CGContext(data: buffer.baseAddress, width: width, height: height,
           bitsPerComponent: 8, bytesPerRow: width * 4, space: CGColorSpaceCreateDeviceRGB(),
-          bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return }
-        // Match Vision's lower-left image coordinates to CoreGraphics bitmap rows.
+          bitmapInfo: CGBitmapInfo.byteOrder32Big.rawValue |
+            CGImageAlphaInfo.premultipliedLast.rawValue) else { return }
+        // Force RGBA byte order; the first bitmap row is the image's top row.
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
       }
     }
@@ -39,8 +40,9 @@ import workmanager_apple
       guard hasColor else { return false }
       let x0 = max(0, Int((box.minX * CGFloat(width)).rounded(.down)))
       let x1 = min(width, Int((box.maxX * CGFloat(width)).rounded(.up)))
-      let y0 = max(0, Int((box.minY * CGFloat(height)).rounded(.down)))
-      let y1 = min(height, Int((box.maxY * CGFloat(height)).rounded(.up)))
+      // Vision's origin is lower-left, while the bitmap rows start at the top.
+      let y0 = max(0, Int(((1 - box.maxY) * CGFloat(height)).rounded(.down)))
+      let y1 = min(height, Int(((1 - box.minY) * CGFloat(height)).rounded(.up)))
       guard x1 > x0, y1 > y0 else { return false }
       let red = (target >> 16) & 255
       let green = (target >> 8) & 255
