@@ -11,16 +11,55 @@ import workmanager_apple
   private var studyChannel: FlutterMethodChannel?
   private var studyTokens: [ObjectIdentifier: Int] = [:]
 
-  /// Recognize text locally; keyword bounds are returned in page coordinates.
-  /// Style and color guesses are left to the user's manual selection.
+  /// Recognize text locally; keyword and ink-color candidates use page coordinates.
+  /// OCR boxes are approximate, so every candidate still needs review.
   private static func recognizeScannedPage(_ page: PDFPage, bounds: CGRect,
-                                           keywords: [String]) -> (text: String, masks: [[String: Any]]) {
+                                           keywords: [String], color: String) -> (text: String, masks: [[String: Any]]) {
     let longest = max(bounds.width, bounds.height)
     guard longest > 0 else { return ("", []) }
     let scale = min(CGFloat(3), CGFloat(2400) / longest)
     let image = page.thumbnail(of: CGSize(width: bounds.width * scale,
       height: bounds.height * scale), for: .cropBox)
     guard let cgImage = image.cgImage else { return ("", []) }
+    let width = cgImage.width
+    let height = cgImage.height
+    var pixels = [UInt8](repeating: 255, count: width * height * 4)
+    let hasColor = color.count == 6 && Int(color, radix: 16) != nil
+    if hasColor {
+      pixels.withUnsafeMutableBytes { buffer in
+        guard let context = CGContext(data: buffer.baseAddress, width: width, height: height,
+          bitsPerComponent: 8, bytesPerRow: width * 4, space: CGColorSpaceCreateDeviceRGB(),
+          bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return }
+        // Match Vision's lower-left image coordinates to CoreGraphics bitmap rows.
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+      }
+    }
+    let target = Int(color, radix: 16) ?? 0
+    func matchesColor(_ box: CGRect) -> Bool {
+      guard hasColor else { return false }
+      let x0 = max(0, Int((box.minX * CGFloat(width)).rounded(.down)))
+      let x1 = min(width, Int((box.maxX * CGFloat(width)).rounded(.up)))
+      let y0 = max(0, Int((box.minY * CGFloat(height)).rounded(.down)))
+      let y1 = min(height, Int((box.maxY * CGFloat(height)).rounded(.up)))
+      guard x1 > x0, y1 > y0 else { return false }
+      let red = (target >> 16) & 255
+      let green = (target >> 8) & 255
+      let blue = target & 255
+      var ink = 0
+      var matched = 0
+      for y in y0..<y1 {
+        for x in x0..<x1 {
+          let offset = (y * width + x) * 4
+          let r = Int(pixels[offset]), g = Int(pixels[offset + 1]), b = Int(pixels[offset + 2])
+          if min(r, g, b) > 215 { continue }
+          ink += 1
+          if abs(r - red) <= 45 && abs(g - green) <= 45 && abs(b - blue) <= 45 {
+            matched += 1
+          }
+        }
+      }
+      return ink >= 8 && matched >= 8 && matched * 3 >= ink
+    }
     let request = VNRecognizeTextRequest()
     request.recognitionLevel = .accurate
     request.usesLanguageCorrection = true
@@ -37,23 +76,29 @@ import workmanager_apple
     var lines: [String] = []
     var masks: [[String: Any]] = []
     var seen = Set<String>()
+    func add(_ box: CGRect, answer: String) {
+      let clipped = box.intersection(CGRect(x: 0, y: 0, width: 1, height: 1))
+      guard !clipped.isNull && clipped.width > 0 && clipped.height > 0 else { return }
+      let key = String(format: "%.3f:%.3f:%.3f:%.3f", clipped.minX, clipped.minY,
+        clipped.width, clipped.height)
+      if seen.insert(key).inserted {
+        masks.append(["rect": [clipped.minX, 1 - clipped.maxY, clipped.width, clipped.height],
+                      "answer": answer])
+      }
+    }
     for observation in observations {
       guard let recognized = observation.topCandidates(1).first else { continue }
       lines.append(recognized.string)
+      if matchesColor(observation.boundingBox) {
+        add(observation.boundingBox, answer: recognized.string)
+      }
       for keyword in keywords where !keyword.isEmpty {
         var cursor = recognized.string.startIndex
         while cursor < recognized.string.endIndex,
               let match = recognized.string.range(of: keyword,
                 range: cursor..<recognized.string.endIndex) {
           if let location = try? recognized.boundingBox(for: match) {
-            let box = location.boundingBox.intersection(CGRect(x: 0, y: 0, width: 1, height: 1))
-            if !box.isNull && box.width > 0 && box.height > 0 {
-              let key = String(format: "%.3f:%.3f:%.3f:%.3f", box.minX, box.minY, box.width, box.height)
-              if seen.insert(key).inserted {
-                masks.append(["rect": [box.minX, 1 - box.maxY, box.width, box.height],
-                              "answer": String(recognized.string[match])])
-              }
-            }
+            add(location.boundingBox, answer: String(recognized.string[match]))
           }
           cursor = match.upperBound
         }
@@ -152,7 +197,8 @@ import workmanager_apple
           }
           let extractedText = page.string ?? ""
           let scan = extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            ? Self.recognizeScannedPage(page, bounds: bounds, keywords: keywords) : (text: "", masks: [[String: Any]]())
+            ? Self.recognizeScannedPage(page, bounds: bounds, keywords: keywords,
+                color: wantedColor) : (text: "", masks: [[String: Any]]())
           let text = scan.text.isEmpty ? extractedText : scan.text
           var masks: [[String: Any]] = scan.masks
           var seen = Set<String>()

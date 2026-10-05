@@ -84,22 +84,38 @@ void main() {
     final rasterCanvas = Canvas(recorder);
     rasterCanvas.drawColor(Colors.white, BlendMode.src);
     final label = TextPainter(
-      text: const TextSpan(text: 'Alpha', style: TextStyle(fontSize: 72, color: Colors.black)),
+      text: const TextSpan(text: 'Alpha', style: TextStyle(fontSize: 72, color: Colors.red)),
       textDirection: TextDirection.ltr,
     )..layout();
     label.paint(rasterCanvas, const Offset(75, 75));
+    final otherLabel = TextPainter(
+      text: const TextSpan(text: 'Beta', style: TextStyle(fontSize: 72, color: Colors.black)),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    otherLabel.paint(rasterCanvas, const Offset(75, 190));
     final raster = await recorder.endRecording().toImage(640, 320);
     final rasterBytes = await raster.toByteData(format: ui.ImageByteFormat.png);
     raster.dispose();
     final scanned = pw.Document();
     scanned.addPage(pw.Page(build: (_) => pw.Image(
       pw.MemoryImage(rasterBytes!.buffer.asUint8List()))));
+    final scannedPdf = await scanned.save();
     final scanResult = await channel.invokeMapMethod<String, dynamic>('analyze', {
-      'bytes': await scanned.save(), 'page': 0, 'keywords': ['Alpha'],
+      'bytes': scannedPdf, 'page': 0, 'keywords': ['Alpha'],
       'bold': false, 'underline': false, 'highlight': false, 'color': '',
     });
     expect(scanResult?['text'], contains('Alpha'));
     expect(scanResult?['masks'], isNotEmpty);
+    final colorResult = await channel.invokeMapMethod<String, dynamic>('analyze', {
+      'bytes': scannedPdf, 'page': 0, 'keywords': <String>[],
+      'bold': false, 'underline': false, 'highlight': false, 'color': 'FF0000',
+    });
+    final colorMasks = (colorResult?['masks'] as List?) ?? [];
+    expect(colorMasks, isNotEmpty, reason: 'Red scan text should be detected');
+    expect(colorMasks.any((mask) => (mask as Map)['answer'].toString().contains('Alpha')),
+        isTrue);
+    expect(colorMasks.any((mask) => (mask as Map)['answer'].toString().contains('Beta')),
+        isFalse, reason: 'Black scan text must not match red ink');
 
     await tester.tap(find.byTooltip('学习：挖空与朗读'));
     await waitFor(tester, find.byType(StudyPanel));
