@@ -17,6 +17,8 @@
 
 开源项目、GitHub Actions、Codemagic、fastlane 可以自动化编译和签名操作，不能替用户生成 Apple 颁发的分发身份。当前无用户签名材料，因此不能声称已产生可直接安装或 TestFlight 的正式 IPA。不要把 Apple ID 密码、双重验证代码、p12 证书或私钥发在聊天中。
 
+无苹果设备时可以另走**远程真机测试**：[BrowserStack](https://www.browserstack.com/docs/app-automate/appium/resign-ios-apps)说明会为其设备自动重签上传的 IPA，[App Live 上传说明](https://www.browserstack.com/docs/app-live/app-source/upload-apps)支持 IPA，[试用说明](https://www.browserstack.com/support/faq/plans-pricing/plans/what-do-i-get-with-a-free-trial)列出有限测试时间。需用户自己的服务账号，并把测试包上传到该平台；目前尚未验证本项目的无签名 IPA 是否被接受，也尚未进行远程真机测试。即使测试成功，平台重签也只供平台设备运行，不会产生可安装到用户未来 iPhone 的正式分发包。[AWS Device Farm](https://docs.aws.amazon.com/devicefarm/latest/developerguide/skip-app-re-signing-on-private-devices.html)也会为其设备重签，但[免费试用结束后按分钟计费](https://aws.amazon.com/device-farm/pricing/)，在未核对账户账单限制前不启动。
+
 参考：[Apple 免费个人团队限制](https://developer.apple.com/help/account/basics/about-your-developer-account/)、[Apple 会员与费用](https://developer.apple.com/programs/whats-included/)、[TestFlight 规则](https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/)、[GitHub Actions 苹果签名](https://docs.github.com/en/actions/how-tos/deploy/deploy-to-third-party-platforms/sign-xcode-applications)、[Flutter iOS 发布](https://docs.flutter.dev/deployment/ios)、[Sideloadly 官网](https://sideloadly.io/)。
 
 ## “完整版本”的验收口径
