@@ -1,0 +1,80 @@
+{
+  "schema": "study-quality-corpus/1",
+  "synthetic": true,
+  "reference": "Windows PowerPoint 16 PDF export",
+  "fixtures": {
+    "text_styles.pdf": {
+      "sha256": "6f73963aee5680ed9388c07cbf317adab57d03cc95c7d7b144deefc79e4aaf09",
+      "pages": 2
+    },
+    "scan_styles.pdf": {
+      "sha256": "88d7b968f8acbbfc6d95d2bd48a5e40085c09cdc41aee567a11126dfa2d3d0ad",
+      "pages": 1
+    },
+    "large_120_pages.pdf": {
+      "sha256": "a340e48da4cb8d1040a2470abd49e8573cecb1f634dbb6e607f8c5e56622d82b",
+      "pages": 120
+    },
+    "deck_complex.pptx": {
+      "sha256": "ef59f64daee09a209be07dbc3c8a7389e11083d399c026a610f8abbb4509e1a8",
+      "pages": 4
+    },
+    "deck_complex_powerpoint.pdf": {
+      "sha256": "9fcf6375c9785b711ecfba2949050abdc9573c9b0d180af71396cfa10ace3e7b",
+      "pages": 4
+    }
+  },
+  "scan_expected": {
+    "keyword": [
+      "Alpha",
+      "Beta",
+      "Gamma",
+      "Delta"
+    ],
+    "red_text": [
+      "Alpha"
+    ],
+    "highlight": [
+      "Beta"
+    ],
+    "underline": [
+      "Gamma"
+    ],
+    "negative": [
+      "Delta"
+    ],
+    "boxes": {
+      "Alpha": [
+        0.0703,
+        0.0882,
+        0.1039,
+        0.0851
+      ],
+      "Beta": [
+        0.0703,
+        0.2382,
+        0.0836,
+        0.0851
+      ],
+      "Gamma": [
+        0.0703,
+        0.393,
+        0.1445,
+        0.0851
+      ],
+      "Delta": [
+        0.0703,
+        0.5406,
+        0.0948,
+        0.0851
+      ]
+    }
+  },
+  "pptx_provisional_gates": {
+    "page_count_equal": true,
+    "max_aspect_ratio_delta": 0.005,
+    "mean_rgb_mae_max": 12.0,
+    "worst_page_rgb_mae_max": 20.0,
+    "min_text_character_recall": 0.98
+  }
+}

@@ -55,3 +55,13 @@ jobs:
         run: flutter analyze lib/data/study lib/components/study integration_test/study_flow_test.dart
       - name: Run study tests
         run: flutter test test/study
+      - name: Set up Python for fixed corpus checks
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: study/overlay/tools/study/requirements.txt
+      - name: Install corpus dependencies
+        run: python -m pip install -r ../study/overlay/tools/study/requirements.txt
+      - name: Verify fixed study corpus and quality metrics
+        run: python -m unittest discover -s ../study/overlay/tools/study -p test_quality.py -v
