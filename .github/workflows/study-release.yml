@@ -1,0 +1,115 @@
+name: Publish stable Study release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'New stable tag, for example v0.1.0'
+        required: true
+        type: string
+      ios_run_id:
+        description: 'Green Build Study iOS run for this exact commit'
+        required: true
+        type: string
+      windows_tool_run_id:
+        description: 'Green Windows textbook tool run for this exact commit'
+        required: true
+        type: string
+permissions:
+  contents: write
+  actions: read
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate green build inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+          IOS_RUN_ID: ${{ inputs.ios_run_id }}
+          WINDOWS_RUN_ID: ${{ inputs.windows_tool_run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$IOS_RUN_ID" =~ ^[0-9]+$ ]]
+          [[ "$WINDOWS_RUN_ID" =~ ^[0-9]+$ ]]
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "Release already exists: $VERSION" >&2
+            exit 1
+          fi
+          for entry in "$IOS_RUN_ID:.github/workflows/study-ios.yml" \
+                       "$WINDOWS_RUN_ID:.github/workflows/study-windows-tool.yml"; do
+            run_id=${entry%%:*}
+            expected_path=${entry#*:}
+            actual_sha=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" --jq '.head_sha')
+            conclusion=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" --jq '.conclusion')
+            path=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" --jq '.path')
+            test "$actual_sha" = "$GITHUB_SHA"
+            test "$conclusion" = success
+            test "$path" = "$expected_path"
+          done
+      - name: Download tested release packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IOS_RUN_ID: ${{ inputs.ios_run_id }}
+          WINDOWS_RUN_ID: ${{ inputs.windows_tool_run_id }}
+        run: |
+          set -euo pipefail
+          mkdir -p release/unsigned release/simulator release/windows
+          gh run download "$IOS_RUN_ID" -n Study-unsigned-iOS-app -D release/unsigned
+          gh run download "$IOS_RUN_ID" -n Study-iOS-simulator-app -D release/simulator
+          gh run download "$WINDOWS_RUN_ID" -n Study-Windows-textbook-tool -D release/windows
+          test -s release/unsigned/Study-UNSIGNED.ipa
+          test -s release/simulator/Study-simulator-app.zip
+          test -s release/windows/StudyTextbookTool.exe
+          cp release/unsigned/Study-UNSIGNED.ipa release/
+          cp release/simulator/Study-simulator-app.zip release/
+          cp release/windows/StudyTextbookTool.exe release/
+          cd release
+          sha256sum Study-UNSIGNED.ipa Study-simulator-app.zip StudyTextbookTool.exe > SHA256SUMS.txt
+      - name: Prepare changelog
+        env:
+          VERSION: ${{ inputs.version }}
+          IOS_RUN_ID: ${{ inputs.ios_run_id }}
+          WINDOWS_RUN_ID: ${{ inputs.windows_tool_run_id }}
+        run: |
+          set -euo pipefail
+          previous=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          {
+            echo "# Study $VERSION"
+            echo
+            echo "Commit: $GITHUB_SHA"
+            echo
+            echo '## Changes'
+            if [ -n "$previous" ]; then
+              git log --no-merges --pretty='- %s (%h)' "$previous..HEAD"
+            else
+              git log -30 --no-merges --pretty='- %s (%h)'
+            fi
+            echo
+            echo '## Verification'
+            echo "- iOS simulator tests and unsigned IPA: https://github.com/$GITHUB_REPOSITORY/actions/runs/$IOS_RUN_ID"
+            echo "- Windows textbook tool: https://github.com/$GITHUB_REPOSITORY/actions/runs/$WINDOWS_RUN_ID"
+            echo
+            echo 'The IPA is unsigned and needs Apple signing before device installation. The simulator ZIP can be uploaded to Appetize for manual review.'
+          } > release/CHANGELOG.md
+      - name: Publish stable release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          gh release create "$VERSION" \
+            release/Study-UNSIGNED.ipa \
+            release/Study-simulator-app.zip \
+            release/StudyTextbookTool.exe \
+            release/SHA256SUMS.txt \
+            release/CHANGELOG.md \
+            --target "$GITHUB_SHA" \
+            --title "Study $VERSION" \
+            --notes-file release/CHANGELOG.md

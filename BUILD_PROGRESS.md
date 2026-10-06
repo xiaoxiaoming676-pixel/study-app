@@ -109,3 +109,5 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 阶段 6 已提交未启用的 `codemagic.template.yaml` 和 `CODEMAGIC_SETUP.md`。模板复用固定 Saber 来源与 overlay，通过 Codemagic 的 App Store Connect API 集成取得签名材料，构建 signed IPA 并提交 TestFlight；仓库不存任何 Apple 密钥。要等用户拥有 Apple Developer Program 与 App Store Connect app 后才能实际调试和启用，当前不能视作签名或上传已完成。
 
 阶段 7 Windows GUI 已在本机打成单文件 `StudyTextbookTool.exe`，40,397,858 字节，SHA256 `34f6d053b2fdf7b5377e95e47acf9f55d4a028b93494e367c0609485f12c3323`。打包后的无窗口依赖 smoke test 与本机教材测试 15/15 通过；保留已有 PowerPoint/LibreOffice 自动选择逻辑。新增 Windows Actions 可重复构建及归档，但云端结果待核对。EXE 未签名，Windows 首次运行可能提示发布者未知。
+
+阶段 8 已编写手动稳定版 Release 流水线，要求指定同一提交的绿色 iOS 和 Windows 工具运行，下载其经过测试的 unsigned IPA、模拟器 ZIP、Windows EXE，生成 SHA256 和提交变更记录后才创建版本。工作流只响应手动触发，尚未实际发布；必须等阶段 4、5、7 的云端结果绿色并核对产物后再运行。
