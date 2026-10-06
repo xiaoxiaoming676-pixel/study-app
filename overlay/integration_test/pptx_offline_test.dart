@@ -19,7 +19,7 @@ void main() {
     }).timeout(const Duration(minutes: 3));
     expect(path, isNotNull);
     final output = File(path!);
-    expect(await output.exists(), isTrue);
+    expect(output.existsSync(), isTrue);
     final pdf = await PdfDocument.openData(await output.readAsBytes());
     expect(pdf.pages.length, 4);
     for (final page in pdf.pages) {
