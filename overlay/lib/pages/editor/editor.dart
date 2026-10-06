@@ -164,7 +164,7 @@ class EditorState extends State<Editor> {
 
   ValueNotifier<SavingState> savingState = ValueNotifier(SavingState.saved);
   Timer? _delayedSaveTimer;
-  int _saveFailureCount = 0;
+  var _saveFailureCount = 0;
   Timer? _watchServerTimer;
 
   // used to prevent accidentally drawing when pinch zooming

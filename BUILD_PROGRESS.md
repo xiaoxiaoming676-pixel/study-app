@@ -111,3 +111,7 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 阶段 7 Windows GUI 已在本机打成单文件 `StudyTextbookTool.exe`，40,397,858 字节，SHA256 `34f6d053b2fdf7b5377e95e47acf9f55d4a028b93494e367c0609485f12c3323`。打包后的无窗口依赖 smoke test 与本机教材测试 15/15 通过；保留已有 PowerPoint/LibreOffice 自动选择逻辑。新增 Windows Actions 可重复构建及归档，但云端结果待核对。EXE 未签名，Windows 首次运行可能提示发布者未知。
 
 阶段 8 已编写手动稳定版 Release 流水线，要求指定同一提交的绿色 iOS 和 Windows 工具运行，下载其经过测试的 unsigned IPA、模拟器 ZIP、Windows EXE，生成 SHA256 和提交变更记录后才创建版本。工作流只响应手动触发，尚未实际发布；必须等阶段 4、5、7 的云端结果绿色并核对产物后再运行。
+
+阶段 7 云端复验：[Windows 工具运行 37471751616](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37471751616) 整体绿色，包含 EXE 打包、封装后 smoke test 和固定教材测试；[归档 11417452584](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37471751616/artifacts/11417452584) GitHub ZIP SHA256 `f08eb5b3836e439506a386bdb1114bc58351e361c4c821aebc31ce5083906301`，2026-10-20 过期。云端无 PowerPoint/LibreOffice，真实转换用例有明确条件跳过；本机有 PowerPoint，15/15 全部通过。阶段 4 Windows Flutter 分析在同一提交仍失败，不能因此认定 App 数据可靠性通过。
+
+阶段 4 静态检查根因已本机定位：保存重试计数器显式写 `int` 触发仓库的 `omit_obvious_property_types` 规则。改为类型推断后，以固定 Flutter 3.47.4 / Dart 3.13.3 在 Windows 本机按云端同范围执行 `dart analyze`，结果 `No issues found!`；Flutter 单元与 iOS 模拟器仍需新提交的云端结果。
