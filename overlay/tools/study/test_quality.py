@@ -1,4 +1,5 @@
 import hashlib
+import base64
 import json
 import tempfile
 import unittest
@@ -7,6 +8,7 @@ from pathlib import Path
 import fitz
 
 from quality.evaluate import compare
+from quality.extract_logged_pdf import extract
 from quality.score_scan import score
 
 QUALITY = Path(__file__).resolve().parent / 'quality'
@@ -57,6 +59,18 @@ class QualityCorpusTests(unittest.TestCase):
         result = score(expected, predictions)
         self.assertEqual((result['red_text']['tp'], result['red_text']['fp']), (1, 1))
         self.assertEqual((result['underline']['tp'], result['underline']['fn']), (0, 1))
+
+    def test_simulator_pdf_log_recovery_detects_missing_chunks(self):
+        source = (FIXTURES / 'deck_complex_powerpoint.pdf').read_bytes()
+        encoded = base64.b64encode(source).decode('ascii')
+        chunks = [encoded[index:index + 3072] for index in range(0, len(encoded), 3072)]
+        lines = [f'STUDY_PDF_BEGIN:{len(source)}:{len(chunks)}']
+        lines.extend(f'test stdout: STUDY_PDF_CHUNK:{index}:{chunk}'
+                     for index, chunk in enumerate(chunks))
+        lines.append('STUDY_PDF_END')
+        self.assertEqual(extract('\n'.join(lines)), source)
+        with self.assertRaises(ValueError):
+            extract('\n'.join(lines[0:2] + lines[3:]))
 
 
 if __name__ == '__main__':

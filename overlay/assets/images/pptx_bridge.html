@@ -22,6 +22,14 @@
   <script>/* STUDY_RENDERER_SCRIPT */</script>
   <script>
     const { PptxViewer, RECOMMENDED_ZIP_LIMITS } = window.StudyPptx || {};
+    const mobileZipLimits = {
+      ...RECOMMENDED_ZIP_LIMITS,
+      maxEntries: 2000,
+      maxEntryUncompressedBytes: 16 * 1024 * 1024,
+      maxTotalUncompressedBytes: 96 * 1024 * 1024,
+      maxMediaBytes: 64 * 1024 * 1024,
+      maxConcurrency: 2,
+    };
 
     let viewer;
     let controller;
@@ -34,7 +42,7 @@
       const target = document.getElementById('slide');
       viewer = new PptxViewer(target, {
         fitMode: 'none',
-        zipLimits: RECOMMENDED_ZIP_LIMITS,
+        zipLimits: mobileZipLimits,
         lazySlides: true,
         lazyMedia: true,
         pdfjs: false,

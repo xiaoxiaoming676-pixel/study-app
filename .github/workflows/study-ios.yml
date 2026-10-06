@@ -114,7 +114,12 @@ jobs:
         id: pptx_flow
         continue-on-error: true
         timeout-minutes: 15
-        run: flutter test integration_test/pptx_offline_test.dart -d "$STUDY_SIM_ID" --reporter expanded
+        run: |
+          set -euo pipefail
+          mkdir -p build/study
+          flutter test integration_test/pptx_offline_test.dart -d "$STUDY_SIM_ID" --reporter expanded | tee build/study/pptx-test.log
+          python3 ../study/overlay/tools/study/quality/extract_logged_pdf.py \
+            build/study/pptx-test.log build/study/pptx-simulator.pdf
       - name: Set up Python for PPTX visual comparison
         if: steps.pptx_flow.outcome == 'success'
         uses: actions/setup-python@v7
@@ -127,11 +132,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install PyMuPDF==1.26.6 Pillow==12.3.0
-          container=$(xcrun simctl get_app_container "$STUDY_SIM_ID" com.xiaoxiaoming676.studyapp data)
-          output=$(find "$container/tmp" -maxdepth 1 -name 'study-*.pdf' -print -quit)
-          test -n "$output" && test -f "$output"
-          mkdir -p build/study
-          cp "$output" build/study/pptx-simulator.pdf
+          test -s build/study/pptx-simulator.pdf
           python ../study/overlay/tools/study/quality/evaluate.py \
             build/study/pptx-simulator.pdf \
             --reference ../study/overlay/tools/study/quality/fixtures/deck_complex_powerpoint.pdf \

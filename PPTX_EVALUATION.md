@@ -35,3 +35,5 @@
 App 内原型把独立 ESM 和 Apache-2.0 许可文件在构建时打包，运行时只加载本机文件。WKWebView 逐页生成 PDF，再交给现有 PDF 教材系统。输入限制 16 MB，采用渲染器推荐的 ZIP 解析上限，限制 100 页和 150 MB 输出，设 180 秒总超时，支持取消、进程终止和失败提示。字体优先采用 iOS 中文系统字体并回退到通用字体。`WKWebView.createPDF`、离线模块加载、Files 选取与实际导入质量仍需 iPhone/iPad 模拟器验证；Windows Edge 结果不能替代这项验证。真实教材尚未提供，不能报告真实课件准确率或决定切换 Pagus。
 
 2026-10-06 iOS 首轮模拟器失败定位：两条原型运行均成功下载并校验浏览器 ESM、通过 Flutter 分析和原有 PDF 流程，但在 WKWebView 的 `file://` 页面中 ES module 没有执行，导致 `PPTX_MODULE`。这是模块加载失败，不是幻灯片渲染质量结论。采用固定 esbuild 0.25.12 将已校验的 ESM 转成 IIFE，构建时嵌入离线 HTML，使 WebKit 只需加载一个本地文件；附带原包 Apache 许可和打包依赖的许可说明。本机 Edge `file://` 用同一内嵌 HTML 完成四页渲染。iOS 转换、逐页 PDF 和视觉指标须以新模拟器运行复验。
+
+下一轮 [iOS 运行 37434382755](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37434382755) 进入了 iPhone PPTX 测试后的视觉比较，但比较步骤退出码 2，未留下模拟器 PDF 与 JSON 评分归档，整条运行仍红色。现将测试生成的固定合成 PDF 从测试日志分块传出，严格校验完整性后再运行现有 PowerPoint 视觉比较；不依赖测试完成后 App 临时容器是否仍存在。下一轮需检查 iPhone 与 iPad 测试原始结果、输出 PDF、逐页分数和最终运行结论。ZIP 限制进一步收紧为单项 16 MiB、总解压 96 MiB、媒体 64 MiB、并发 2；本机高压缩比越限样本被拦截，正常四页样本仍能打开。真实教材质量和 100 页手机性能尚无证据。

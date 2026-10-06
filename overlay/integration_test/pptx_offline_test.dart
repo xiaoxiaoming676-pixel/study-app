@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -20,13 +21,25 @@ void main() {
     expect(path, isNotNull);
     final output = File(path!);
     expect(output.existsSync(), isTrue);
-    final pdf = await PdfDocument.openData(await output.readAsBytes());
+    final pdfBytes = await output.readAsBytes();
+    final pdf = await PdfDocument.openData(pdfBytes);
     expect(pdf.pages.length, 4);
     for (final page in pdf.pages) {
       expect(page.width / page.height, closeTo(16 / 9, 0.02));
     }
     pdf.dispose();
-    // Keep the synthetic conversion in the simulator container for visual CI scoring.
+    // Flutter may remove the test app before a later CI step can read its tmp directory.
+    // Emit only this fixed synthetic PDF so CI can score the actual WebKit output.
+    final encoded = base64Encode(pdfBytes);
+    const chunkSize = 3072;
+    final chunks = (encoded.length + chunkSize - 1) ~/ chunkSize;
+    print('STUDY_PDF_BEGIN:${pdfBytes.length}:$chunks');
+    for (var index = 0; index < chunks; index++) {
+      final start = index * chunkSize;
+      final end = start + chunkSize < encoded.length ? start + chunkSize : encoded.length;
+      print('STUDY_PDF_CHUNK:$index:${encoded.substring(start, end)}');
+    }
+    print('STUDY_PDF_END');
     await input.delete();
   });
 }
