@@ -119,3 +119,7 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 提交 `db23867` 的 [Windows 运行 37474771603](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37474771603) 整体绿色：Flutter 分析、学习记录单元测试及固定 corpus 均通过。对应 [iOS 运行 37474771689](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37474771689) 已通过静态分析和学习单元测试，进入模拟器阶段，尚未取得整体结论；阶段 4 保存回归及阶段 5 模拟器 ZIP 暂不算完成。
 
 阶段 3 合成大文件验收准备：复用固定的 120 页 PDF 作为 iOS 测试资源，新增独立模拟器用例记录导入毫秒、保存毫秒及进程 RSS 高水位，并验证关闭重开仍有 120 页、无效 PDF 导入不破坏原教材。该 PDF 仅 94,448 字节，测得到页数扩展和恢复路径，**测不到几十 MB 扫描教材的真实内存压力**；取消与真实扫描教材误检/漏检仍待专门样本和测试。
+
+2026-10-06 最新核查：提交 `db23867` 的 [iOS 运行 37474771689](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37474771689) 最终标为失败，但 Flutter 静态分析、单元测试、iPhone/iPad PDF 与 PPTX 集成测试、PowerPoint 视觉比较、无签名 IPA 构建、模拟器应用安装启动和 ZIP 归档步骤均显示成功。失败发生于末尾的 `Enforce simulator test result`：该较早提交的工作流已引用当时尚不存在的 `large_pdf_flow` 步骤，导致汇总条件判失败，不能称该运行整体绿色。无签名 IPA [归档 11421145031](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37474771689/artifacts/11421145031) 和模拟器 ZIP [归档 11420502988](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37474771689/artifacts/11420502988) 均已上传。当前提交 `cb98496` 已加入对应的 120 页测试步骤；[Windows 运行 37476926902](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37476926902) 绿色，[iOS 运行 37476926700](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37476926700) 排队，待验证新测试及末尾汇总。
+
+阶段 5 BrowserStack 试跑：用户已登录 App Live，平台接受旧版绿色构建 `aada5dc` 的无签名 IPA 上传并显示为应用。免费 iPhone 会话在启动时提示可用试用时段已用完，未取得安装、启动或功能操作的真机证据；因此真机 smoke test 仍待可用测试时段。上传的旧包也不包含后续阶段 4 的数据保存修复。
