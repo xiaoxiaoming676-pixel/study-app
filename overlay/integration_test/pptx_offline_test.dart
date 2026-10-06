@@ -4,8 +4,24 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:pdfrx/pdfrx.dart';
+import 'package:saber/data/editor/editor_core_info.dart';
+import 'package:saber/data/file_manager/file_manager.dart';
+import 'package:saber/data/flavor_config.dart';
+import 'package:saber/data/routes.dart';
+import 'package:saber/data/sentry/sentry_init.dart';
+import 'package:saber/main.dart' as saber;
+import 'package:saber/pages/editor/editor.dart';
+import 'package:saber/pages/home/home.dart';
+
+Future<void> waitFor(WidgetTester tester, Finder target) async {
+  for (var i = 0; i < 240 && target.evaluate().isEmpty; i++) {
+    await tester.pump(const Duration(milliseconds: 500));
+  }
+  expect(target, findsWidgets);
+}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +61,22 @@ void main() {
       );
     }
     debugPrintSynchronously('STUDY_PDF_END');
+
+    FlavorConfig.setupFromEnvironment();
+    disableSentryForTesting();
+    await saber.appRunner(const []);
+    await waitFor(tester, find.byType(HomePage));
+    final notePath = await FileManager.newFilePath('/');
+    GoRouter.of(tester.element(find.byType(HomePage)))
+        .push(RoutePaths.editImportPdf(notePath, output.path));
+    await waitFor(tester, find.byType(Editor));
+    final editor = tester.state<EditorState>(find.byType(Editor));
+    expect(editor.coreInfo.pages.length, 4);
+    await editor.saveToFile();
+    final reopened = await EditorCoreInfo.loadFromFilePath(notePath);
+    expect(reopened.pages.length, 4);
+    expect(reopened.pages.every((page) => page.backgroundImage != null), isTrue);
+
     await input.delete();
   });
 }
