@@ -7,8 +7,8 @@
 ## 今天在 Windows 电脑上做
 
 1. 先前的零步骤失败是私有仓库免费分钟 2,000/2,000 用尽且 Actions 预算为 $0 所致。用户确认后仓库已公开，标准托管运行器已能启动；未修改预算或支付资料。
-2. Windows 本地 PowerPoint 教材转换及 Python 工具测试 10/10 通过。[最新 Windows Flutter 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37345347141) 静态检查无问题，9/9 项学习模块测试通过。
-3. [最新绿色 iOS 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37345346944) 已整体通过：静态检查、9/9 项单元测试、iPhone 与 iPad 模拟器完整学习流程测试（含扫描页彩色高亮、三种 PDF 导出页数、保存与重开预览）和无签名编译/上传均通过。可在 Artifacts 获取 [Study-unsigned-iOS-app](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37345346944/artifacts/11360794709)，归档有效期至 2026-10-19 17:27 UTC。用户目前没有苹果设备，不需要下载或尝试安装；Windows 本机不能运行 Xcode iOS 模拟器或完成 iOS 构建。
+2. Windows 本地 PowerPoint 教材转换及 Python 工具测试 10/10 通过。[最新 Windows Flutter 验证](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37368501599) 静态检查无问题，9/9 项学习模块测试通过。
+3. [最新绿色 iOS 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37368501535) 已整体通过：静态检查、9/9 项单元测试、iPhone 与 iPad 模拟器完整学习流程测试（含扫描页彩色高亮和近似下划线、三种 PDF 导出页数、保存与重开预览）和无签名编译/上传均通过。可在 Artifacts 获取 [Study-unsigned-iOS-app](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37368501535/artifacts/11381842224)，归档有效期至 2026-10-20 00:12 UTC。用户目前没有苹果设备，不需要下载或尝试安装；Windows 本机不能运行 Xcode iOS 模拟器或完成 iOS 构建。
 4. PPTX 可先在 Windows 的 PowerPoint 或 LibreOffice 导出 PDF 检查教材版式；App 内直接导入 PPTX 仍需继续开发。
 
 下面的 IPA、签名和真机步骤保留给将来有 iPhone/iPad 时使用。现在不用安装 Sideloadly，不用准备 Apple ID 签名，也不用购买苹果设备来完成本阶段的软件检查。

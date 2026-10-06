@@ -1,11 +1,11 @@
 # iPhone 安装版路线与首版验收
 
-核查日期：2026-10-05。目标设备以 iPhone 为主，兼顾 iPad；用户现在只有 Windows 电脑和 Android 手机，没有苹果设备。源码仓库为本仓库。
+核查日期：2026-10-06。目标设备以 iPhone 为主，兼顾 iPad；用户现在只有 Windows 电脑和 Android 手机，没有苹果设备。源码仓库为本仓库。
 
 ## 已有产物
 
-- [最新绿色 GitHub Actions 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37345346944)：静态分析、9/9 学习单元测试、iPhone 与 iPad 模拟器端到端测试（含扫描页彩色字体和高亮候选、保存 PDF 字节核对、三种学习 PDF 导出页数与重开预览）及 Xcode 无签名构建均通过。更早一轮出现过一次未复现的 PDFium 读取失败，后续两轮已通过，仍保留回归断言。
-- [最新归档](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37345346944/artifacts/11360794709)：`Study-unsigned-iOS-app`，22,154,203 字节，有效期至 2026-10-19 17:27 UTC；GitHub 记录的归档 ZIP SHA256 为 `78f20c4408b6bd100f77684f055b0949ea8cac39768cdf42323e21ceab7c6e6c`。ZIP 内另含 IPA 的 `SHA256.txt`。
+- [最新绿色 GitHub Actions 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37368501535)：静态分析、9/9 学习单元测试、iPhone 与 iPad 模拟器端到端测试（含扫描页彩色字体、浅底高亮和近似下划线候选、保存 PDF 字节核对、三种学习 PDF 导出页数与重开预览）及 Xcode 无签名构建均通过。更早一轮出现过一次未复现的 PDFium 读取失败，后续绿色轮次未复现，仍保留回归断言。
+- [最新归档](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37368501535/artifacts/11381842224)：`Study-unsigned-iOS-app`，22,154,549 字节，有效期至 2026-10-20 00:12 UTC；GitHub 记录的归档 ZIP SHA256 为 `f3adbf5eb13872854c5e40b970933f6ccee1c116894c17f2bf05dcafbb4fa628`。ZIP 内另含 IPA 的 `SHA256.txt`。
 - 构建使用独立 Bundle ID `com.xiaoxiaoming676.studyapp` 和显示名 Study；IPA 未签名，不能直接安装到 iPhone。用户没有苹果设备，因此尚未进行真机验收。
 
 ## 两条安装路线
@@ -29,7 +29,7 @@
 - 手写或键入答案、教材任意空白处批注、保存退出并再次打开、原文/练习/笔记导出。
 - 系统中文声音朗读、暂停和继续；iPad 基本布局与笔迹已在模拟器流程通过，真实设备手感和听感仍待验收。
 - 手机内直接导入 PPT/PPTX 与其他目标文档并完成可靠转换或呈现。当前仅有电脑 PPTX→PDF 工具，不能宣称手机端已支持。
-- 图片扫描教材已有本地 Vision OCR，可提取文字并按关键词、指定 RGB 颜色或彩色浅底高亮生成近似挖空候选；扫描图中的加粗、下划线和语义重点生成仍未完成。彩色字体及浅底高亮测试已在 iPhone、iPad 模拟器通过，真实教材需人工逐项确认。
+- 图片扫描教材已有本地 Vision OCR，可提取文字并按关键词、指定 RGB 颜色、彩色浅底高亮或近似下划线生成挖空候选；合成样本已在 iPhone、iPad 模拟器通过。扫描图中的加粗和语义重点生成仍未完成；下划线、颜色及高亮在真实教材中仍需人工逐项确认。
 - 样式/高亮候选的准确性、大教材性能、笔记在重签名或升级后的保留，均需真机和真实教材验证。
 
 下一阶段：在没有苹果设备时继续开发 App 内 PPTX 导入路线与扫描图样式识别，并通过云端 iPhone 模拟器回归测试。App 内 PPTX 高保真转换目前缺少可持续部署的转换服务；电脑本地 PowerPoint 转 PDF 工具已可用，不等于手机内直接导入。将来有 iPhone 时再核对真实 Files 选取、系统语音、笔迹和保存升级体验，记录型号/iOS/失败步骤。签名流水线须在账号就绪后按实际 Team ID 和描述文件调试，不沿用 Saber 作者的 Team ID。
