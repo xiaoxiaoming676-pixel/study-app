@@ -165,4 +165,14 @@ class StudyTool(tk.Tk):
 
 
 if __name__ == '__main__':
-    StudyTool().mainloop()
+    import sys
+    if '--self-test' in sys.argv:
+        # Usable by CI without opening a window or converting a private file.
+        import fitz
+        import pptx
+        interpreter = tk.Tcl()
+        assert interpreter.eval('expr {2 + 2}') == '4'
+        assert fitz.open().page_count == 0
+        assert pptx.Presentation()
+    else:
+        StudyTool().mainloop()

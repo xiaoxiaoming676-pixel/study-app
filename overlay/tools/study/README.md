@@ -1,12 +1,14 @@
 # 本地教材处理工具
 
-当前为开发验证版。PPTX 转换在电脑完成，尚未接入 App 内的一键 PPT 导入。
+这是可独立运行的 Windows 教材准备工具；App 内 PPTX 离线导入另有模拟器原型，仍需真实教材验收。
 
 ## 环境
 
 Python 3.10+。PPTX 转换需要 LibreOffice，或 Windows 上安装的 Microsoft PowerPoint。
 
-Windows 用户首次安装依赖后，可在仓库文件夹双击 `start_study_tool.cmd` 打开本地窗口，选择课件、填写关键词或颜色、勾选加粗/下划线，再点“生成教材”。窗口自动建议新的输出文件夹，避免覆盖旧文件；下划线仅适用于 PPTX 显式文字样式。若本机没有 `.venv`，先运行 `py -3 -m pip install -r overlay/tools/study/requirements.txt`。处理过程在本机完成，不会上传课件。
+Windows 用户可直接双击构建产物 `StudyTextbookTool.exe`，无需另装 Python。窗口选择课件、填写关键词或颜色、勾选加粗/下划线，再点“生成教材”。窗口自动建议新的输出文件夹，避免覆盖旧文件；下划线仅适用于 PPTX 显式文字样式。PPTX 转 PDF 自动选用系统上的 LibreOffice，若无则使用 Windows PowerPoint；PDF 输入不需要两者。处理过程在本机完成，不会上传课件。首次运行单文件 EXE 可能稍慢。
+
+开发者在仓库根目录运行 `build_windows_tool.ps1` 即可重新生成 EXE 和 SHA256；GitHub Actions 也会自动构建并上传 `Study-Windows-textbook-tool` 归档。源码模式可双击 `start_study_tool.cmd`，此模式需要 Python 和依赖。
 
 命令行方式仍可用于批量处理：
 

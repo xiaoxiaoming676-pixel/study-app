@@ -105,3 +105,7 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 阶段 4 数据可靠性本地改动待自动测试：学习记录新增 `schemaVersion=1`，无版本旧记录按 v0 读取并迁移，未来未知版本拒绝静默覆盖；保存期间的新编辑继续保持未保存并安排下一次写入，失败时最多延时重试三次。资产先于主文档写入，各文件先写同目录临时文件、刷新后替换，失败时旧文件保留；新增中断注入及旧版笔记/回答迁移测试。当前仍是逐文件提交，整组文档与多资产并非数据库式原子事务；实际 iOS 模拟器保存升级回归和大文件异常恢复尚待运行，不能承诺零丢失。
 
 阶段 5 模拟器包流水线待验证：现有 unsigned IPA 继续保留；iOS 工作流新增调试版模拟器 `.app` 编译、在云端 iPad 模拟器安装启动及 ZIP/SHA256 归档，供无苹果设备阶段手动上传 Appetize。Appetize 官方要求 ZIP 中包含模拟器 `.app`；BrowserStack 接受 IPA 上传并可对 iOS 应用重签名，但本项目的 **unsigned IPA 尚未在 BrowserStack 实测**，不能声称可直接使用。阶段 4 提交 `b292bb8` 的 Windows 静态分析失败，具体诊断仍待本地工具复查；暂不记录为阶段 4 通过。
+
+阶段 6 已提交未启用的 `codemagic.template.yaml` 和 `CODEMAGIC_SETUP.md`。模板复用固定 Saber 来源与 overlay，通过 Codemagic 的 App Store Connect API 集成取得签名材料，构建 signed IPA 并提交 TestFlight；仓库不存任何 Apple 密钥。要等用户拥有 Apple Developer Program 与 App Store Connect app 后才能实际调试和启用，当前不能视作签名或上传已完成。
+
+阶段 7 Windows GUI 已在本机打成单文件 `StudyTextbookTool.exe`，40,397,858 字节，SHA256 `34f6d053b2fdf7b5377e95e47acf9f55d4a028b93494e367c0609485f12c3323`。打包后的无窗口依赖 smoke test 与本机教材测试 15/15 通过；保留已有 PowerPoint/LibreOffice 自动选择逻辑。新增 Windows Actions 可重复构建及归档，但云端结果待核对。EXE 未签名，Windows 首次运行可能提示发布者未知。
