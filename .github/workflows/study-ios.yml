@@ -94,7 +94,7 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
       - name: Analyze study modules
-        run: flutter analyze lib/data/study lib/components/study lib/pages/editor/editor.dart lib/components/toolbar/editor_bottom_sheet.dart integration_test/study_flow_test.dart integration_test/pptx_offline_test.dart
+        run: flutter analyze lib/data/study lib/components/study lib/pages/editor/editor.dart lib/components/toolbar/editor_bottom_sheet.dart integration_test/study_flow_test.dart integration_test/pptx_offline_test.dart integration_test/large_pdf_test.dart
       - name: Run study tests
         run: flutter test test/study
       - name: Boot available iPhone simulator
@@ -110,6 +110,24 @@ jobs:
         continue-on-error: true
         timeout-minutes: 20
         run: flutter test integration_test/study_flow_test.dart -d "$STUDY_SIM_ID" --reporter expanded
+      - name: Measure 120-page PDF import and recovery on iPhone simulator
+        id: large_pdf_flow
+        continue-on-error: true
+        timeout-minutes: 15
+        run: |
+          set -euo pipefail
+          mkdir -p build/study
+          flutter test integration_test/large_pdf_test.dart -d "$STUDY_SIM_ID" --reporter expanded | tee build/study/large-pdf-test.log
+          grep 'STUDY_LARGE_' build/study/large-pdf-test.log > build/study/large-pdf-metrics.txt
+          test "$(wc -l < build/study/large-pdf-metrics.txt)" -eq 2
+      - name: Upload synthetic large PDF metrics
+        if: always() && steps.large_pdf_flow.outcome == 'success'
+        uses: actions/upload-artifact@v7
+        with:
+          name: Study-large-PDF-simulator-metrics
+          path: source/build/study/large-pdf-metrics.txt
+          if-no-files-found: error
+          retention-days: 14
       - name: Test offline PPTX conversion on iPhone simulator
         id: pptx_flow
         continue-on-error: true
@@ -219,5 +237,5 @@ jobs:
           if-no-files-found: error
           retention-days: 14
       - name: Enforce simulator test result
-        if: steps.flow.outcome != 'success' || steps.ipad_flow.outcome != 'success' || steps.pptx_flow.outcome != 'success' || steps.ipad_pptx_flow.outcome != 'success' || steps.pptx_quality.outcome != 'success'
+        if: steps.flow.outcome != 'success' || steps.large_pdf_flow.outcome != 'success' || steps.ipad_flow.outcome != 'success' || steps.pptx_flow.outcome != 'success' || steps.ipad_pptx_flow.outcome != 'success' || steps.pptx_quality.outcome != 'success'
         run: exit 1

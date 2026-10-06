@@ -115,3 +115,7 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 阶段 7 云端复验：[Windows 工具运行 37471751616](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37471751616) 整体绿色，包含 EXE 打包、封装后 smoke test 和固定教材测试；[归档 11417452584](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37471751616/artifacts/11417452584) GitHub ZIP SHA256 `f08eb5b3836e439506a386bdb1114bc58351e361c4c821aebc31ce5083906301`，2026-10-20 过期。云端无 PowerPoint/LibreOffice，真实转换用例有明确条件跳过；本机有 PowerPoint，15/15 全部通过。阶段 4 Windows Flutter 分析在同一提交仍失败，不能因此认定 App 数据可靠性通过。
 
 阶段 4 静态检查根因已本机定位：保存重试计数器显式写 `int` 触发仓库的 `omit_obvious_property_types` 规则。改为类型推断后，以固定 Flutter 3.47.4 / Dart 3.13.3 在 Windows 本机按云端同范围执行 `dart analyze`，结果 `No issues found!`；Flutter 单元与 iOS 模拟器仍需新提交的云端结果。
+
+提交 `db23867` 的 [Windows 运行 37474771603](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37474771603) 整体绿色：Flutter 分析、学习记录单元测试及固定 corpus 均通过。对应 [iOS 运行 37474771689](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37474771689) 已通过静态分析和学习单元测试，进入模拟器阶段，尚未取得整体结论；阶段 4 保存回归及阶段 5 模拟器 ZIP 暂不算完成。
+
+阶段 3 合成大文件验收准备：复用固定的 120 页 PDF 作为 iOS 测试资源，新增独立模拟器用例记录导入毫秒、保存毫秒及进程 RSS 高水位，并验证关闭重开仍有 120 页、无效 PDF 导入不破坏原教材。该 PDF 仅 94,448 字节，测得到页数扩展和恢复路径，**测不到几十 MB 扫描教材的真实内存压力**；取消与真实扫描教材误检/漏检仍待专门样本和测试。

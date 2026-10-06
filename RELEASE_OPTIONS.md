@@ -2,10 +2,14 @@
 
 核查日期：2026-10-06。目标设备以 iPhone 为主，兼顾 iPad；用户现在只有 Windows 电脑和 Android 手机，没有苹果设备。源码仓库为本仓库。
 
+## 当前补充（2026-10-06）
+
+后续阶段已在原有 PDF 学习系统上增加 App 内离线 PPTX→PDF 原型。[iOS 绿色运行 37444388719](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37444388719) 的 iPhone/iPad 合成课件转换和视觉比较通过：四页，平均 RGB 误差 2.219/255、最差页 2.916/255；图表页可提取文字召回率为 0，完整质量门槛仍未通过。近期另加的“转换后导入教材、保存重开”测试和模拟器 ZIP 构建尚待最终绿色运行，不能把合成结果外推到真实教材。现有无签名 IPA 仍可下载；新增模拟器 ZIP 旨在上传 Appetize 手动体验，尚未完成归档验证。Windows 教材工具已生成独立 EXE 并在 [云端运行 37471751616](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37471751616) 通过。Apple Developer Program 与签名材料仍缺，因此没有 signed IPA 或 TestFlight 包。
+
 ## 已有产物
 
-- [最新绿色 GitHub Actions 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37394156946)：静态分析、9/9 学习单元测试、iPhone 与 iPad 模拟器端到端测试（含扫描页彩色字体、浅底高亮和近似下划线候选、保存 PDF 字节核对、三种学习 PDF 导出页数与重开预览）及 Xcode 无签名构建均通过。更早一轮出现过一次未复现的 PDFium 读取失败，后续绿色轮次未复现，仍保留回归断言。
-- [最新归档](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37394156946/artifacts/11384530556)：`Study-unsigned-iOS-app`，22,154,624 字节，有效期至 2026-10-20 01:11 UTC；GitHub 记录的归档 ZIP SHA256 为 `629039466e7b6a2e3f2d6ad385f9bd710df3bca288b875f53dc09e650fcae9db`。ZIP 内另含 IPA 的 `SHA256.txt`。
+- [最近完整绿色 iOS 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37444388719)：静态分析、已有 PDF 学习流程、iPhone/iPad 合成 PPTX 离线转换、视觉比较与 Xcode 无签名构建均通过；后续新增功能须以更新运行重新验收。
+- [无签名 IPA 归档](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37444388719/artifacts/11404124367)：`Study-unsigned-iOS-app`，2026-10-20 过期；GitHub ZIP SHA256 `a89e525681330ce58744a487badd8273a7946659d019b14021681220794aafdb`。ZIP 内另含 IPA 的 `SHA256.txt`。
 - 构建使用独立 Bundle ID `com.xiaoxiaoming676.studyapp` 和显示名 Study；IPA 未签名，不能直接安装到 iPhone。用户没有苹果设备，因此尚未进行真机验收。
 
 ## 两条安装路线
@@ -28,8 +32,8 @@
 - PDF 导入；依据颜色、关键词、加粗/下划线或 PDF 高亮生成挖空候选，支持确认与手动框选，不限红色。
 - 手写或键入答案、教材任意空白处批注、保存退出并再次打开、原文/练习/笔记导出。
 - 系统中文声音朗读、暂停和继续；iPad 基本布局与笔迹已在模拟器流程通过，真实设备手感和听感仍待验收。
-- 手机内直接导入 PPT/PPTX 与其他目标文档并完成可靠转换或呈现。当前仅有电脑 PPTX→PDF 工具，不能宣称手机端已支持。
+- 手机内直接导入 PPTX 与其他目标文档并完成可靠转换或呈现。当前 iOS 离线 PPTX 原型只在四页合成课件上通过视觉比较；图表文字和真实教材仍未达验收门槛。
 - 图片扫描教材已有本地 Vision OCR，可提取文字并按关键词、指定 RGB 颜色、彩色浅底高亮或近似下划线生成挖空候选；合成样本已在 iPhone、iPad 模拟器通过。扫描图中的加粗和语义重点生成仍未完成；下划线、颜色及高亮在真实教材中仍需人工逐项确认。
 - 样式/高亮候选的准确性、大教材性能、笔记在重签名或升级后的保留，均需真机和真实教材验证。
 
-下一阶段：在没有苹果设备时继续开发 App 内 PPTX 导入路线与扫描图样式识别，并通过云端 iPhone 模拟器回归测试。App 内 PPTX 高保真转换目前缺少可持续部署的转换服务；电脑本地 PowerPoint 转 PDF 工具已可用，不等于手机内直接导入。将来有 iPhone 时再核对真实 Files 选取、系统语音、笔迹和保存升级体验，记录型号/iOS/失败步骤。签名流水线须在账号就绪后按实际 Team ID 和描述文件调试，不沿用 Saber 作者的 Team ID。
+下一阶段：完成 PPTX→现有教材系统保存重开、模拟器 ZIP、数据保存回归和 100+ 页性能检查；取得真实教材后再核对扫描样式、图表文字和版面质量。不切换云端转换。将来有 iPhone 时再核对真实 Files 选取、系统语音、笔迹和保存升级体验，记录型号/iOS/失败步骤。签名流水线须在账号就绪后按实际 Team ID 和描述文件调试，不沿用 Saber 作者的 Team ID。
