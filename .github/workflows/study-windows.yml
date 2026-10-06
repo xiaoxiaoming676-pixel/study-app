@@ -52,7 +52,7 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
       - name: Analyze study modules
-        run: flutter analyze lib/data/study lib/components/study integration_test/study_flow_test.dart
+        run: flutter analyze lib/data/study lib/components/study lib/pages/editor/editor.dart lib/components/toolbar/editor_bottom_sheet.dart integration_test/study_flow_test.dart integration_test/pptx_offline_test.dart
       - name: Run study tests
         run: flutter test test/study
       - name: Set up Python for fixed corpus checks

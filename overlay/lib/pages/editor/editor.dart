@@ -1199,6 +1199,52 @@ class EditorState extends State<Editor> {
     return importPdfFromFilePath(file.path!);
   }
 
+  /// Convert a presentation locally and feed the PDF to the existing importer.
+  Future<bool> importPptx() async {
+    if (coreInfo.readOnly || !Platform.isIOS || !Editor.canRasterPdf) return false;
+    final file = await FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: ['pptx'],
+    );
+    if (file?.path == null || !mounted) return false;
+    const channel = MethodChannel('study.local/pptx');
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(SnackBar(
+      duration: const Duration(minutes: 4),
+      content: const Text('正在离线转换 PPTX…'),
+      action: SnackBarAction(
+        label: '取消',
+        onPressed: () => channel.invokeMethod<void>('cancel'),
+      ),
+    ));
+    String? failure;
+    String? convertedPath;
+    try {
+      convertedPath = await channel.invokeMethod<String>('convert', {
+        'path': file!.path,
+      });
+      if (convertedPath == null) failure = 'PPTX 转换没有生成 PDF';
+    } on PlatformException catch (error) {
+      failure = error.message ?? 'PPTX 转换失败';
+    } catch (_) {
+      failure = 'PPTX 转换失败，请检查文件或改用 PDF';
+    }
+    if (!mounted) return false;
+    messenger.hideCurrentSnackBar();
+    if (failure != null) {
+      messenger.showSnackBar(SnackBar(content: Text(failure)));
+      return false;
+    }
+    try {
+      return await importPdfFromFilePath(convertedPath!);
+    } catch (_) {
+      if (mounted) {
+        messenger.showSnackBar(const SnackBar(content: Text('转换后的 PDF 导入失败')));
+      }
+      return false;
+    }
+  }
+
   Future<bool> importPdfFromFilePath(String path) async {
     final pdfDocument = await coreInfo.assetCache.pdfDocumentCache.load(path);
 
@@ -1845,6 +1891,7 @@ class EditorState extends State<Editor> {
       }),
       pickPhotos: _pickPhotos,
       importPdf: importPdf,
+      importPptx: importPptx,
       canRasterPdf: Editor.canRasterPdf,
       getIsWatchingServer: () => _watchServerTimer?.isActive ?? false,
       setIsWatchingServer: (bool watch) {

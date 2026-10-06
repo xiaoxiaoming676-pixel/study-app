@@ -3,12 +3,15 @@ import UIKit
 import AVFoundation
 import PDFKit
 import Vision
+import WebKit
 import workmanager_apple
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate, AVSpeechSynthesizerDelegate {
   private let studySpeech = AVSpeechSynthesizer()
   private var studyChannel: FlutterMethodChannel?
+  private var pptxChannel: FlutterMethodChannel?
+  private var pptxConverter: StudyPptxConverter?
   private var studyTokens: [ObjectIdentifier: Int] = [:]
 
   /// Recognize text locally; keyword and ink-color candidates use page coordinates.
@@ -196,6 +199,31 @@ import workmanager_apple
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     AppDelegate.registerPlugins(with: engineBridge.pluginRegistry)
     guard let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "StudyLocal") else { return }
+    let pptx = FlutterMethodChannel(name: "study.local/pptx", binaryMessenger: registrar.messenger())
+    pptxChannel = pptx
+    pptx.setMethodCallHandler { [weak self] call, result in
+      guard let self = self else { return }
+      switch call.method {
+      case "convert":
+        guard self.pptxConverter == nil,
+              let args = call.arguments as? [String: Any],
+              let path = args["path"] as? String else {
+          result(FlutterError(code: "PPTX_BUSY", message: "PPTX 转换正在进行或文件路径无效", details: nil))
+          return
+        }
+        let converter = StudyPptxConverter(path: path) { [weak self] outcome in
+          self?.pptxConverter = nil
+          result(outcome)
+        }
+        self.pptxConverter = converter
+        converter.start()
+      case "cancel":
+        self.pptxConverter?.cancel()
+        result(nil)
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
     let channel = FlutterMethodChannel(name: "study.local/pdf_speech", binaryMessenger: registrar.messenger())
     studyChannel = channel
     studySpeech.delegate = self
@@ -315,6 +343,200 @@ import workmanager_apple
           DispatchQueue.main.async { result(["text": text, "masks": masks]) }
         }
       default: result(FlutterMethodNotImplemented)
+      }
+    }
+  }
+}
+
+/// Converts one untrusted PPTX at a time in a private, offline WebKit view.
+/// PDFKit only joins pages; the existing PDF importer owns the resulting document.
+private final class StudyPptxConverter: NSObject, WKNavigationDelegate {
+  private let sourcePath: String
+  private var complete: ((Any?) -> Void)?
+  private var view: WKWebView?
+  private var deadline: DispatchWorkItem?
+  private var source: Data?
+  private var encoded = ""
+  private var pdf = PDFDocument()
+  private var pageCount = 0
+  private var pageWidth: CGFloat = 0
+  private var pageHeight: CGFloat = 0
+  private var pdfBytes = 0
+
+  init(path: String, complete: @escaping (Any?) -> Void) {
+    sourcePath = path
+    self.complete = complete
+  }
+
+  func start() {
+    guard let attributes = try? FileManager.default.attributesOfItem(atPath: sourcePath),
+          let length = attributes[.size] as? NSNumber,
+          length.intValue > 0, length.intValue <= 16 * 1024 * 1024,
+          let bytes = try? Data(contentsOf: URL(fileURLWithPath: sourcePath), options: .mappedIfSafe),
+          bytes.starts(with: [0x50, 0x4b]) else {
+      fail("PPTX_INPUT", "请选择不超过 16 MB 的有效 PPTX 文件")
+      return
+    }
+    source = bytes
+    let key = FlutterDartProject.lookupKey(forAsset: "assets/images/pptx_bridge.html")
+    let html = Bundle.main.bundleURL.appendingPathComponent(key)
+    guard FileManager.default.fileExists(atPath: html.path) else {
+      fail("PPTX_ASSET", "离线转换组件缺失，请重新安装 App")
+      return
+    }
+    let config = WKWebViewConfiguration()
+    config.websiteDataStore = .nonPersistent()
+    config.defaultWebpagePreferences.allowsContentJavaScript = true
+    let webView = WKWebView(frame: CGRect(x: -3200, y: 0, width: 1280, height: 720), configuration: config)
+    webView.navigationDelegate = self
+    webView.isOpaque = false
+    view = webView
+    guard let root = UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.rootViewController?.view else {
+      fail("PPTX_VIEW", "无法启动离线转换视图")
+      return
+    }
+    root.addSubview(webView)
+    webView.loadFileURL(html, allowingReadAccessTo: html.deletingLastPathComponent())
+    let timeout = DispatchWorkItem { [weak self] in self?.fail("PPTX_TIMEOUT", "PPTX 转换超时，请换用 PDF") }
+    deadline = timeout
+    DispatchQueue.main.asyncAfter(deadline: .now() + 180, execute: timeout)
+  }
+
+  func cancel() { fail("PPTX_CANCELLED", "已取消 PPTX 转换") }
+
+  private func fail(_ code: String, _ message: String) {
+    finish(FlutterError(code: code, message: message, details: nil))
+  }
+
+  private func finish(_ value: Any?) {
+    guard let callback = complete else { return }
+    complete = nil
+    deadline?.cancel()
+    deadline = nil
+    view?.evaluateJavaScript("window.studyCancel?.()", completionHandler: nil)
+    view?.stopLoading()
+    view?.navigationDelegate = nil
+    view?.removeFromSuperview()
+    view = nil
+    source = nil
+    encoded = ""
+    pdf = PDFDocument()
+    callback(value)
+  }
+
+  func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    waitForModule(0)
+  }
+
+  func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+    fail("PPTX_WEB", "离线渲染页面加载失败：\(error.localizedDescription)")
+  }
+
+  func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+    fail("PPTX_WEB", "离线渲染页面加载失败：\(error.localizedDescription)")
+  }
+
+  func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+    fail("PPTX_MEMORY", "转换进程已停止，文件可能过大")
+  }
+
+  private func waitForModule(_ attempt: Int) {
+    guard let webView = view, complete != nil else { return }
+    webView.evaluateJavaScript("window.studyBridgeReady === true") { [weak self] value, _ in
+      guard let self = self, self.complete != nil else { return }
+      if (value as? Bool) == true { self.sendDeckChunk(0) }
+      else if attempt < 100 {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.waitForModule(attempt + 1) }
+      } else { self.fail("PPTX_MODULE", "离线转换组件未能启动") }
+    }
+  }
+
+  private func sendDeckChunk(_ offset: Int) {
+    guard let bytes = source, let webView = view, complete != nil else { return }
+    if offset == 0 {
+      encoded = bytes.base64EncodedString()
+      webView.evaluateJavaScript("window.studyChunks = []") { [weak self] _, error in
+        if let error = error { self?.fail("PPTX_WEB", error.localizedDescription) }
+        else { self?.sendDeckChunk(1) }
+      }
+      return
+    }
+    let start = (offset - 1) * 262_144
+    if start >= encoded.count {
+      encoded = ""
+      source = nil
+      webView.callAsyncJavaScript("return await window.studyOpen(window.studyChunks.join(''))",
+                                  arguments: [:], in: nil, in: .page) { [weak self] outcome in
+        guard let self = self, self.complete != nil else { return }
+        guard case .success(let info) = outcome else {
+          if case .failure(let error) = outcome {
+            self.fail("PPTX_PARSE", "PPTX 解析失败：\(error.localizedDescription)")
+          }
+          return
+        }
+        guard let values = info as? [String: Any],
+              let count = values["count"] as? Int,
+              let width = values["width"] as? Double,
+              let height = values["height"] as? Double,
+              (1...100).contains(count), width >= 100, height >= 100,
+              width <= 3000, height <= 3000 else {
+          self.fail("PPTX_LIMIT", "页数或页面尺寸超出转换限制")
+          return
+        }
+        self.pageCount = count
+        self.pageWidth = CGFloat(width)
+        self.pageHeight = CGFloat(height)
+        webView.frame = CGRect(x: -3200, y: 0, width: width, height: height)
+        self.renderPage(0)
+      }
+      return
+    }
+    let lower = encoded.index(encoded.startIndex, offsetBy: start)
+    let upper = encoded.index(lower, offsetBy: min(262_144, encoded.count - start))
+    let chunk = String(encoded[lower..<upper])
+    webView.evaluateJavaScript("window.studyChunks.push('\(chunk)')") { [weak self] _, error in
+      if let error = error { self?.fail("PPTX_WEB", error.localizedDescription) }
+      else { self?.sendDeckChunk(offset + 1) }
+    }
+  }
+
+  private func renderPage(_ index: Int) {
+    guard let webView = view, complete != nil else { return }
+    if index >= pageCount {
+      guard let data = pdf.dataRepresentation(), data.count <= 150 * 1024 * 1024 else {
+        fail("PPTX_OUTPUT", "转换后的 PDF 过大")
+        return
+      }
+      let output = FileManager.default.temporaryDirectory.appendingPathComponent("study-\(UUID().uuidString).pdf")
+      do {
+        try data.write(to: output, options: .atomic)
+        finish(output.path)
+      } catch { fail("PPTX_SAVE", "无法保存转换后的 PDF") }
+      return
+    }
+    webView.callAsyncJavaScript("return await window.studyRender(\(index))",
+                                arguments: [:], in: nil, in: .page) { [weak self] outcome in
+      guard let self = self, self.complete != nil else { return }
+      if case .failure(let error) = outcome {
+        self.fail("PPTX_RENDER", "第 \(index + 1) 页渲染失败：\(error.localizedDescription)")
+        return
+      }
+      let settings = WKPDFConfiguration()
+      settings.rect = CGRect(x: 0, y: 0, width: self.pageWidth, height: self.pageHeight)
+      webView.createPDF(configuration: settings) { result in
+        guard self.complete != nil else { return }
+        switch result {
+        case .failure(let error): self.fail("PPTX_PDF", "第 \(index + 1) 页生成 PDF 失败：\(error.localizedDescription)")
+        case .success(let data):
+          self.pdfBytes += data.count
+          guard self.pdfBytes <= 150 * 1024 * 1024,
+                let page = PDFDocument(data: data)?.page(at: 0) else {
+            self.fail("PPTX_OUTPUT", "转换后的 PDF 过大或页面无效")
+            return
+          }
+          self.pdf.insert(page, at: self.pdf.pageCount)
+          self.renderPage(index + 1)
+        }
       }
     }
   }

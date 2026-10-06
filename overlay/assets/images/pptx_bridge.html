@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' blob:; style-src 'unsafe-inline'; img-src data: blob:; font-src data: blob:; worker-src blob:">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: white; overflow: hidden;
+      font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif; }
+    #slide { overflow: hidden; background: white; }
+  </style>
+</head>
+<body>
+  <div id="slide"></div>
+  <script type="module">
+    import { PptxViewer, RECOMMENDED_ZIP_LIMITS } from './pptx_renderer.js';
+
+    let viewer;
+    let controller;
+    window.studyBridgeReady = true;
+    window.studyOpen = async (encoded) => {
+      const binary = atob(encoded);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index++) bytes[index] = binary.charCodeAt(index);
+      controller = new AbortController();
+      const target = document.getElementById('slide');
+      viewer = new PptxViewer(target, {
+        fitMode: 'none',
+        zipLimits: RECOMMENDED_ZIP_LIMITS,
+        lazySlides: true,
+        lazyMedia: true,
+        pdfjs: false,
+      });
+      await viewer.open(bytes.buffer, { renderMode: 'slide', signal: controller.signal });
+      window.studyChunks = [];
+      const count = viewer.slideCount;
+      const width = viewer.slideWidth;
+      const height = viewer.slideHeight;
+      if (!Number.isFinite(width) || !Number.isFinite(height) ||
+          width < 100 || height < 100 || width > 3000 || height > 3000 ||
+          count < 1 || count > 100) {
+        throw new Error('PPTX_PAGE_LIMIT');
+      }
+      target.style.width = `${width}px`;
+      target.style.height = `${height}px`;
+      return { count, width, height };
+    };
+    window.studyRender = async (index) => {
+      if (!viewer || index < 0 || index >= viewer.slideCount) throw new Error('PPTX_PAGE');
+      await viewer.renderSlide(index);
+      await document.fonts.ready;
+      await Promise.all(Array.from(document.images, (image) => image.decode().catch(() => {})));
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      return true;
+    };
+    window.studyCancel = () => { controller?.abort(); viewer?.destroy(); viewer = undefined; };
+  </script>
+</body>
+</html>

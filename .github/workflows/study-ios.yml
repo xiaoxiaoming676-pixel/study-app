@@ -35,6 +35,18 @@ jobs:
           persist-credentials: false
       - name: Apply study changes
         run: cp -R ../study/overlay/. .
+      - name: Install pinned offline PPTX renderer
+        run: |
+          set -euo pipefail
+          package=$(npm pack @aiden0z/pptx-renderer@1.3.0 --silent)
+          mkdir -p /tmp/study-pptx-renderer
+          tar -xzf "$package" -C /tmp/study-pptx-renderer
+          renderer=/tmp/study-pptx-renderer/package/dist/aiden0z-pptx-renderer.browser.es.js
+          printf '%s  %s\n' '46b61afa1435de0c194f93324c9467ca392c891c6e07517727c8ffb5e51c376b' "$renderer" | shasum -a 256 -c -
+          cp "$renderer" assets/images/pptx_renderer.js
+          cp /tmp/study-pptx-renderer/package/LICENSE assets/images/pptx_renderer.LICENSE
+          cp ../study/overlay/tools/study/quality/fixtures/deck_complex.pptx assets/images/deck_complex.pptx
+          rm -f "$package"
       - name: Set study app identity
         run: |
           python3 - <<'PY'
@@ -69,7 +81,7 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
       - name: Analyze study modules
-        run: flutter analyze lib/data/study lib/components/study integration_test/study_flow_test.dart
+        run: flutter analyze lib/data/study lib/components/study lib/pages/editor/editor.dart lib/components/toolbar/editor_bottom_sheet.dart integration_test/study_flow_test.dart integration_test/pptx_offline_test.dart
       - name: Run study tests
         run: flutter test test/study
       - name: Boot available iPhone simulator
@@ -85,6 +97,11 @@ jobs:
         continue-on-error: true
         timeout-minutes: 20
         run: flutter test integration_test/study_flow_test.dart -d "$STUDY_SIM_ID" --reporter expanded
+      - name: Test offline PPTX conversion on iPhone simulator
+        id: pptx_flow
+        continue-on-error: true
+        timeout-minutes: 15
+        run: flutter test integration_test/pptx_offline_test.dart -d "$STUDY_SIM_ID" --reporter expanded
       - name: Boot available iPad simulator
         run: |
           set -euo pipefail
@@ -99,6 +116,11 @@ jobs:
         continue-on-error: true
         timeout-minutes: 20
         run: flutter test integration_test/study_flow_test.dart -d "$STUDY_IPAD_ID" --reporter expanded
+      - name: Test offline PPTX conversion on iPad simulator
+        id: ipad_pptx_flow
+        continue-on-error: true
+        timeout-minutes: 15
+        run: flutter test integration_test/pptx_offline_test.dart -d "$STUDY_IPAD_ID" --reporter expanded
       - name: Build unsigned iOS app
         run: flutter build ios --release --no-codesign
       - name: Package unsigned app
@@ -122,5 +144,5 @@ jobs:
           if-no-files-found: error
           retention-days: 14
       - name: Enforce simulator test result
-        if: steps.flow.outcome != 'success' || steps.ipad_flow.outcome != 'success'
+        if: steps.flow.outcome != 'success' || steps.ipad_flow.outcome != 'success' || steps.pptx_flow.outcome != 'success' || steps.ipad_pptx_flow.outcome != 'success'
         run: exit 1
