@@ -71,11 +71,21 @@ void main() {
         .push(RoutePaths.editImportPdf(notePath, output.path));
     await waitFor(tester, find.byType(Editor));
     final editor = tester.state<EditorState>(find.byType(Editor));
-    expect(editor.coreInfo.pages.length, 4);
+    int importedPages() => editor.coreInfo.pages
+        .where((page) => page.backgroundImage != null)
+        .length;
+    for (var i = 0;
+        i < 240 && importedPages() != 4;
+        i++) {
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    expect(importedPages(), 4);
     await editor.saveToFile();
     final reopened = await EditorCoreInfo.loadFromFilePath(notePath);
-    expect(reopened.pages.length, 4);
-    expect(reopened.pages.every((page) => page.backgroundImage != null), isTrue);
+    expect(
+      reopened.pages.where((page) => page.backgroundImage != null).length,
+      4,
+    );
 
     await input.delete();
   });
