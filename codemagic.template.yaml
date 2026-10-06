@@ -1,0 +1,38 @@
+# Copy this to codemagic.yaml only after the owner has an Apple Developer
+# Program membership, a matching App Store Connect app, and a Codemagic
+# Developer Portal integration named study-appstore.
+workflows:
+  study-testflight:
+    name: Study signed TestFlight IPA
+    max_build_duration: 120
+    integrations:
+      app_store_connect: study-appstore
+    environment:
+      flutter: stable
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.xiaoxiaoming676.studyapp
+    scripts:
+      - name: Checkout pinned application source
+        script: |
+          git clone https://github.com/saber-notes/saber.git source
+          git -C source checkout 5b396a40406c75835741f5c4555bc10ae816f121
+          cp -R overlay/. source/
+      - name: Resolve Flutter dependencies
+        script: |
+          cd source
+          flutter pub get
+      - name: Apply Apple signing profiles
+        script: |
+          cd source
+          xcode-project use-profiles
+      - name: Build signed IPA
+        script: |
+          cd source
+          flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - source/build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
