@@ -6,6 +6,10 @@
 
 Python 3.10+。PPTX 转换需要 LibreOffice，或 Windows 上安装的 Microsoft PowerPoint。
 
+Windows 用户首次安装依赖后，可在仓库文件夹双击 `start_study_tool.cmd` 打开本地窗口，选择课件、填写关键词或颜色、勾选加粗/下划线，再点“生成教材”。窗口自动建议新的输出文件夹，避免覆盖旧文件；下划线仅适用于 PPTX 显式文字样式。若本机没有 `.venv`，先运行 `py -3 -m pip install -r overlay/tools/study/requirements.txt`。处理过程在本机完成，不会上传课件。
+
+命令行方式仍可用于批量处理：
+
 ```sh
 python3 -m pip install -r tools/study/requirements.txt
 python3 tools/study/prepare.py lesson.pptx --out lesson-study --color FF0000 --bold --underline

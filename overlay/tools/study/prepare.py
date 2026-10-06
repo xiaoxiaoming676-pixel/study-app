@@ -31,6 +31,7 @@ def convert_pptx(source: Path, output: Path, workdir: Path) -> None:
         script = '''$ErrorActionPreference = 'Stop'
 $powerPoint = $null
 $presentation = $null
+$alreadyRunning = @(Get-Process POWERPNT -ErrorAction SilentlyContinue).Count -gt 0
 try {
     $powerPoint = New-Object -ComObject PowerPoint.Application
     $presentation = $powerPoint.Presentations.Open($env:STUDY_PPTX_INPUT, $true, $false, $false)
@@ -41,7 +42,8 @@ try {
         [void][Runtime.InteropServices.Marshal]::ReleaseComObject($presentation)
     }
     if ($null -ne $powerPoint) {
-        $powerPoint.Quit()
+        # PowerPoint may reuse an existing COM process; leave that session open.
+        if (-not $alreadyRunning) { $powerPoint.Quit() }
         [void][Runtime.InteropServices.Marshal]::ReleaseComObject($powerPoint)
     }
 }

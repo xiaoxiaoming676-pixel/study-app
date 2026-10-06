@@ -17,3 +17,5 @@
 `BASE_COMMIT.txt` 固定上游 Saber 版本；`overlay/` 保存学习功能改动；`.github/workflows/study-ios.yml` 在 macOS runner 上恢复固定上游源码、覆盖改动、测试并构建无签名 IPA。修改 overlay 或工作流并推送 main 会重新构建，也可以在 Actions 手动运行。
 
 保留原始教材文件并备份笔记。当前手机端优先验证 PDF 学习流程；PPTX 需要先在电脑转换为 PDF。更完整的需求和限制见上述交付说明。
+
+Windows 上需要准备 PPTX 教材时，首次安装 `overlay/tools/study/requirements.txt` 中的依赖后，可双击 `start_study_tool.cmd`，在窗口中选择文件和挖空规则。程序使用本机 PowerPoint（或 LibreOffice）生成 `textbook.pdf`、`practice.pdf` 和 `study-rules.json`；这仍是电脑端步骤，详见 [工具说明](overlay/tools/study/README.md)。
