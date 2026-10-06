@@ -26,7 +26,7 @@ void main() {
       expect(page.width / page.height, closeTo(16 / 9, 0.02));
     }
     pdf.dispose();
-    await output.delete();
+    // Keep the synthetic conversion in the simulator container for visual CI scoring.
     await input.delete();
   });
 }

@@ -102,6 +102,44 @@ jobs:
         continue-on-error: true
         timeout-minutes: 15
         run: flutter test integration_test/pptx_offline_test.dart -d "$STUDY_SIM_ID" --reporter expanded
+      - name: Set up Python for PPTX visual comparison
+        if: steps.pptx_flow.outcome == 'success'
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - name: Compare iPhone PDF with PowerPoint reference
+        if: steps.pptx_flow.outcome == 'success'
+        id: pptx_quality
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python -m pip install PyMuPDF==1.26.6 Pillow==12.3.0
+          container=$(xcrun simctl get_app_container "$STUDY_SIM_ID" com.xiaoxiaoming676.studyapp data)
+          output=$(find "$container/tmp" -maxdepth 1 -name 'study-*.pdf' -print -quit)
+          test -n "$output" && test -f "$output"
+          mkdir -p build/study
+          cp "$output" build/study/pptx-simulator.pdf
+          python ../study/overlay/tools/study/quality/evaluate.py \
+            build/study/pptx-simulator.pdf \
+            --reference ../study/overlay/tools/study/quality/fixtures/deck_complex_powerpoint.pdf \
+            --output build/study/pptx-quality.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          checks = json.loads(Path('build/study/pptx-quality.json').read_text())['checks']
+          for name in ('page_count', 'aspect_ratio', 'mean_rgb_mae', 'worst_page_rgb_mae'):
+              assert checks[name], f'PPTX visual check failed: {name}'
+          PY
+      - name: Upload synthetic PPTX comparison
+        if: always() && steps.pptx_flow.outcome == 'success'
+        uses: actions/upload-artifact@v7
+        with:
+          name: Study-PPTX-simulator-comparison
+          path: |
+            source/build/study/pptx-simulator.pdf
+            source/build/study/pptx-quality.json
+          if-no-files-found: warn
+          retention-days: 14
       - name: Boot available iPad simulator
         run: |
           set -euo pipefail
@@ -144,5 +182,5 @@ jobs:
           if-no-files-found: error
           retention-days: 14
       - name: Enforce simulator test result
-        if: steps.flow.outcome != 'success' || steps.ipad_flow.outcome != 'success' || steps.pptx_flow.outcome != 'success' || steps.ipad_pptx_flow.outcome != 'success'
+        if: steps.flow.outcome != 'success' || steps.ipad_flow.outcome != 'success' || steps.pptx_flow.outcome != 'success' || steps.ipad_pptx_flow.outcome != 'success' || steps.pptx_quality.outcome != 'success'
         run: exit 1
