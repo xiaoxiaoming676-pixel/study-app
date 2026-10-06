@@ -4,7 +4,7 @@
 
 ## 当前可下载版本
 
-[2026-10-06 最新绿色云端构建](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37368501535) 已通过 Flutter 学习模块静态分析、9 项单元测试、iPhone 和 iPad 模拟器学习流程测试（含扫描页彩色字体、浅底高亮和近似下划线候选、保存 PDF 字节比对、三种学习 PDF 导出页数和重开教材预览）以及 Xcode 无签名 iOS 构建。[构建产物](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37368501535/artifacts/11381842224) 含 `Study-UNSIGNED.ipa` 与其 SHA256 清单，有效期至 2026-10-20 00:12 UTC。IPA 必须签名后才能安装；目前用户没有苹果设备，尚未进行真机验收，也不是功能完整的正式版。Windows 教材工具的 PowerPoint 转 PDF 及 Python 测试 10/10 通过，App 内 PPTX 直接导入仍未完成。
+[2026-10-06 最新绿色云端构建](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37394156946) 已通过 Flutter 学习模块静态分析、9 项单元测试、iPhone 和 iPad 模拟器学习流程测试（含扫描页彩色字体、浅底高亮和近似下划线候选、保存 PDF 字节比对、三种学习 PDF 导出页数和重开教材预览）以及 Xcode 无签名 iOS 构建。[构建产物](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37394156946/artifacts/11384530556) 含 `Study-UNSIGNED.ipa` 与其 SHA256 清单，有效期至 2026-10-20 01:11 UTC。IPA 必须签名后才能安装；目前用户没有苹果设备，尚未进行真机验收，也不是功能完整的正式版。Windows 教材工具的 PowerPoint 转 PDF 及 Python 测试 10/10 通过，App 内 PPTX 直接导入仍未完成。
 
 - Windows 验证与将来有 iPhone 时的自用安装：[INSTALL_WINDOWS.md](INSTALL_WINDOWS.md)。
 - 稳定测试与正式交付路径、功能缺口：[RELEASE_OPTIONS.md](RELEASE_OPTIONS.md)。

@@ -4,8 +4,8 @@
 
 ## 已有产物
 
-- [最新绿色 GitHub Actions 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37368501535)：静态分析、9/9 学习单元测试、iPhone 与 iPad 模拟器端到端测试（含扫描页彩色字体、浅底高亮和近似下划线候选、保存 PDF 字节核对、三种学习 PDF 导出页数与重开预览）及 Xcode 无签名构建均通过。更早一轮出现过一次未复现的 PDFium 读取失败，后续绿色轮次未复现，仍保留回归断言。
-- [最新归档](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37368501535/artifacts/11381842224)：`Study-unsigned-iOS-app`，22,154,549 字节，有效期至 2026-10-20 00:12 UTC；GitHub 记录的归档 ZIP SHA256 为 `f3adbf5eb13872854c5e40b970933f6ccee1c116894c17f2bf05dcafbb4fa628`。ZIP 内另含 IPA 的 `SHA256.txt`。
+- [最新绿色 GitHub Actions 运行](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37394156946)：静态分析、9/9 学习单元测试、iPhone 与 iPad 模拟器端到端测试（含扫描页彩色字体、浅底高亮和近似下划线候选、保存 PDF 字节核对、三种学习 PDF 导出页数与重开预览）及 Xcode 无签名构建均通过。更早一轮出现过一次未复现的 PDFium 读取失败，后续绿色轮次未复现，仍保留回归断言。
+- [最新归档](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37394156946/artifacts/11384530556)：`Study-unsigned-iOS-app`，22,154,624 字节，有效期至 2026-10-20 01:11 UTC；GitHub 记录的归档 ZIP SHA256 为 `629039466e7b6a2e3f2d6ad385f9bd710df3bca288b875f53dc09e650fcae9db`。ZIP 内另含 IPA 的 `SHA256.txt`。
 - 构建使用独立 Bundle ID `com.xiaoxiaoming676.studyapp` 和显示名 Study；IPA 未签名，不能直接安装到 iPhone。用户没有苹果设备，因此尚未进行真机验收。
 
 ## 两条安装路线
