@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -33,13 +34,17 @@ void main() {
     final encoded = base64Encode(pdfBytes);
     const chunkSize = 3072;
     final chunks = (encoded.length + chunkSize - 1) ~/ chunkSize;
-    print('STUDY_PDF_BEGIN:${pdfBytes.length}:$chunks');
+    debugPrintSynchronously('STUDY_PDF_BEGIN:${pdfBytes.length}:$chunks');
     for (var index = 0; index < chunks; index++) {
       final start = index * chunkSize;
-      final end = start + chunkSize < encoded.length ? start + chunkSize : encoded.length;
-      print('STUDY_PDF_CHUNK:$index:${encoded.substring(start, end)}');
+      final end = start + chunkSize < encoded.length
+          ? start + chunkSize
+          : encoded.length;
+      debugPrintSynchronously(
+        'STUDY_PDF_CHUNK:$index:${encoded.substring(start, end)}',
+      );
     }
-    print('STUDY_PDF_END');
+    debugPrintSynchronously('STUDY_PDF_END');
     await input.delete();
   });
 }
