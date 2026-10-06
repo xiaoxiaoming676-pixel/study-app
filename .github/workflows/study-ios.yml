@@ -43,7 +43,20 @@ jobs:
           tar -xzf "$package" -C /tmp/study-pptx-renderer
           renderer=/tmp/study-pptx-renderer/package/dist/aiden0z-pptx-renderer.browser.es.js
           printf '%s  %s\n' '46b61afa1435de0c194f93324c9467ca392c891c6e07517727c8ffb5e51c376b' "$renderer" | shasum -a 256 -c -
-          cp "$renderer" assets/images/pptx_renderer.js
+          npx --yes esbuild@0.25.12 "$renderer" --bundle --platform=browser \
+            --format=iife --global-name=StudyPptx --minify --legal-comments=none \
+            --outfile=assets/images/pptx_renderer.js
+          printf '%s  %s\n' 'f83a58c6bcb652ea61456ce8ad6e5e49f10f7f6f4e9dd42f96c3be37a9706958' assets/images/pptx_renderer.js | shasum -a 256 -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          page = Path('assets/images/pptx_bridge.html')
+          script = Path('assets/images/pptx_renderer.js').read_text(encoding='utf-8')
+          source = page.read_text(encoding='utf-8')
+          marker = '/* STUDY_RENDERER_SCRIPT */'
+          assert source.count(marker) == 1 and '</script' not in script.lower()
+          page.write_text(source.replace(marker, script), encoding='utf-8')
+          PY
+          rm assets/images/pptx_renderer.js
           cp /tmp/study-pptx-renderer/package/LICENSE assets/images/pptx_renderer.LICENSE
           cp ../study/overlay/tools/study/quality/fixtures/deck_complex.pptx assets/images/deck_complex.pptx
           rm -f "$package"

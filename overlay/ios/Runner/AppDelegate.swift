@@ -442,9 +442,13 @@ private final class StudyPptxConverter: NSObject, WKNavigationDelegate {
 
   private func waitForModule(_ attempt: Int) {
     guard let webView = view, complete != nil else { return }
-    webView.evaluateJavaScript("window.studyBridgeReady === true") { [weak self] value, _ in
+    webView.evaluateJavaScript("({ready: window.studyBridgeReady === true, error: window.studyBridgeError || ''})") { [weak self] value, _ in
       guard let self = self, self.complete != nil else { return }
-      if (value as? Bool) == true { self.sendDeckChunk(0) }
+      let state = value as? [String: Any]
+      if (state?["ready"] as? Bool) == true { self.sendDeckChunk(0) }
+      else if let error = state?["error"] as? String, !error.isEmpty {
+        self.fail("PPTX_MODULE", "离线转换组件启动失败：\(error)")
+      }
       else if attempt < 100 {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.waitForModule(attempt + 1) }
       } else { self.fail("PPTX_MODULE", "离线转换组件未能启动") }

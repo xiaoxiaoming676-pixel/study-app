@@ -13,12 +13,19 @@
 </head>
 <body>
   <div id="slide"></div>
-  <script type="module">
-    import { PptxViewer, RECOMMENDED_ZIP_LIMITS } from './pptx_renderer.js';
+  <script>
+    window.studyBridgeError = '';
+    window.addEventListener('error', (event) => {
+      window.studyBridgeError = event.message || '本地脚本加载失败';
+    }, true);
+  </script>
+  <script>/* STUDY_RENDERER_SCRIPT */</script>
+  <script>
+    const { PptxViewer, RECOMMENDED_ZIP_LIMITS } = window.StudyPptx || {};
 
     let viewer;
     let controller;
-    window.studyBridgeReady = true;
+    window.studyBridgeReady = !!PptxViewer;
     window.studyOpen = async (encoded) => {
       const binary = atob(encoded);
       const bytes = new Uint8Array(binary.length);
