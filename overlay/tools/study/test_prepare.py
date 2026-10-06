@@ -1,5 +1,7 @@
 import hashlib
 import json
+import os
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -71,6 +73,16 @@ class PrepareTests(unittest.TestCase):
         prs.save(source)
         marked,_=pptx_marked_text(source,underline=True)
         self.assertEqual(marked,[['UnderlinedAnswer']])
+        has_converter = shutil.which('soffice') or shutil.which('libreoffice')
+        if not has_converter and os.name == 'nt':
+            import winreg
+            try:
+                with winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, r'PowerPoint.Application\CLSID'):
+                    has_converter = True
+            except OSError:
+                pass
+        if not has_converter:
+            self.skipTest('Real PPTX export needs installed PowerPoint or LibreOffice')
         m=prepare(source,self.root/'输出',underline=True)
         self.assertEqual(len(m['pages']),1)
         self.assertGreaterEqual(len(m['pages'][0]['masks']),1)
