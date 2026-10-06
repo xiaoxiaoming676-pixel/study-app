@@ -195,6 +195,29 @@ jobs:
             source/build/study/INSTALL-NOTE.txt
           if-no-files-found: error
           retention-days: 14
+      - name: Build iOS simulator app for browser-based manual review
+        run: flutter build ios --simulator --debug
+      - name: Smoke test and package simulator app
+        run: |
+          set -euo pipefail
+          app=build/ios/iphonesimulator/Runner.app
+          test -d "$app"
+          xcrun simctl install "$STUDY_IPAD_ID" "$app"
+          xcrun simctl launch "$STUDY_IPAD_ID" com.xiaoxiaoming676.studyapp
+          ditto -c -k --keepParent "$app" build/study/Study-simulator-app.zip
+          shasum -a 256 build/study/Study-simulator-app.zip > build/study/SIMULATOR-SHA256.txt
+          printf '%s\n' 'Extract this artifact, then upload Study-simulator-app.zip to Appetize.' \
+            > build/study/SIMULATOR-README.txt
+      - name: Upload simulator app
+        uses: actions/upload-artifact@v7
+        with:
+          name: Study-iOS-simulator-app
+          path: |
+            source/build/study/Study-simulator-app.zip
+            source/build/study/SIMULATOR-SHA256.txt
+            source/build/study/SIMULATOR-README.txt
+          if-no-files-found: error
+          retention-days: 14
       - name: Enforce simulator test result
         if: steps.flow.outcome != 'success' || steps.ipad_flow.outcome != 'success' || steps.pptx_flow.outcome != 'success' || steps.ipad_pptx_flow.outcome != 'success' || steps.pptx_quality.outcome != 'success'
         run: exit 1
