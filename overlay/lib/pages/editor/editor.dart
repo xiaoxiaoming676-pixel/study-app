@@ -31,6 +31,7 @@ import 'package:saber/components/toolbar/color_bar.dart';
 import 'package:saber/components/toolbar/editor_bottom_sheet.dart';
 import 'package:saber/components/toolbar/editor_page_manager.dart';
 import 'package:saber/components/toolbar/toolbar.dart';
+import 'package:saber/data/editor/atomic_note_writer.dart';
 import 'package:saber/data/editor/editor_core_info.dart';
 import 'package:saber/data/editor/editor_exporter.dart';
 import 'package:saber/data/editor/editor_history.dart';
@@ -163,6 +164,7 @@ class EditorState extends State<Editor> {
 
   ValueNotifier<SavingState> savingState = ValueNotifier(SavingState.saved);
   Timer? _delayedSaveTimer;
+  int _saveFailureCount = 0;
   Timer? _watchServerTimer;
 
   // used to prevent accidentally drawing when pinch zooming
@@ -886,6 +888,8 @@ class EditorState extends State<Editor> {
   }
 
   void autosaveAfterDelay() {
+    // The in-flight save will schedule another write if this edit is newer.
+    if (savingState.value == .saving) return;
     if (history.isCurrentStateSaved) return cancelAutosaveAndMarkSaved();
 
     late final void Function() callback;
@@ -936,44 +940,52 @@ class EditorState extends State<Editor> {
     }
     if (history.isCurrentStateSaved) return cancelAutosaveAndMarkSaved();
 
-    await _renameFileNow();
-
-    final filePath = coreInfo.filePath + Editor.extension;
-    final Uint8List bson;
-    final OrderedAssetCache assets;
-    coreInfo.assetCache.allowRemovingAssets = false;
+    final snapshot = history.currentChange;
     try {
-      (bson, assets) = coreInfo.saveToBinary(
-        currentPageIndex: currentPageIndex,
-      );
-    } finally {
-      coreInfo.assetCache.allowRemovingAssets = true;
-    }
-    try {
-      await Future.wait([
-        FileManager.writeFile(filePath, bson, awaitWrite: true),
-        for (int i = 0; i < assets.length; ++i)
-          assets
-              .getBytes(i)
-              .then(
-                (bytes) => FileManager.writeFile(
-                  '$filePath.$i',
-                  bytes,
-                  awaitWrite: true,
-                ),
-              ),
-        FileManager.removeUnusedAssets(filePath, numAssets: assets.length),
-      ]);
-      savingState.value = .saved;
-      history.markLastChangeAsSaved();
+      await _renameFileNow();
+      final filePath = coreInfo.filePath + Editor.extension;
+      final Uint8List bson;
+      final OrderedAssetCache assets;
+      coreInfo.assetCache.allowRemovingAssets = false;
+      try {
+        (bson, assets) = coreInfo.saveToBinary(
+          currentPageIndex: currentPageIndex,
+        );
+      } finally {
+        coreInfo.assetCache.allowRemovingAssets = true;
+      }
+      // Assets must be durable before the document can reference them.
+      for (int i = 0; i < assets.length; ++i) {
+        final bytes = await assets.getBytes(i);
+        await writeNoteAssetAtomically('$filePath.$i', bytes);
+      }
+      await writeNoteAtomically(filePath, bson);
+      await FileManager.removeUnusedAssets(filePath, numAssets: assets.length);
+      history.markSnapshotAsSaved(snapshot);
+      _saveFailureCount = 0;
+      if (history.isCurrentStateSaved) {
+        savingState.value = .saved;
+      } else {
+        savingState.value = .waitingToSave;
+        if (mounted) autosaveAfterDelay();
+      }
     } catch (e, st) {
       log.severe('Failed to save file: $e', e, st);
       savingState.value = .waitingToSave;
+      _saveFailureCount++;
+      if (mounted && _saveFailureCount <= 3 && stows.autosaveDelay.value >= 0) {
+        _delayedSaveTimer?.cancel();
+        _delayedSaveTimer = Timer(
+          Duration(seconds: 5 * _saveFailureCount),
+          saveToFile,
+        );
+      }
       if (kDebugMode) rethrow;
       return;
     }
 
-    if (!mounted) return;
+    if (!mounted || !history.isCurrentStateSaved) return;
+    final filePath = coreInfo.filePath + Editor.extension;
     final page = coreInfo.pages.first;
     final previewHeight = page.previewHeight(lineHeight: coreInfo.lineHeight);
     final thumbnailSize = Size(720, 720 * previewHeight / page.size.width);

@@ -50,6 +50,22 @@ void main() {
     expect(history.undo().clozeChange!.current.masks.length, 1);
     expect(history.isCurrentStateSaved, true);
   });
+  test('An edit made during a save remains dirty after the older snapshot writes', () {
+    final history = EditorHistory();
+    final before = ClozeState();
+    final first = ClozeState(note: 'first');
+    history.recordChange(EditorHistoryItem(type: EditorHistoryItemType.cloze,
+      pageIndex: 0, strokes: [], images: [],
+      clozeChange: Change(previous: before, current: first)));
+    final writing = history.currentChange;
+    history.recordChange(EditorHistoryItem(type: EditorHistoryItemType.cloze,
+      pageIndex: 0, strokes: [], images: [],
+      clozeChange: Change(previous: first, current: first.copyWith(note: 'second'))));
+    history.markSnapshotAsSaved(writing);
+    expect(history.isCurrentStateSaved, false);
+    history.undo();
+    expect(history.isCurrentStateSaved, true);
+  });
   test('Practice reset keeps permanent notes and source text', () {
     const mask = ClozeMask(Rect.fromLTWH(0.1, 0.1, 0.2, 0.1), answer: '答案');
     final state = ClozeState(masks: [mask], text: '教材答案', note: '长期笔记',
@@ -69,6 +85,19 @@ void main() {
     final restored = ClozeState.fromJson(original.toJson());
     expect(restored.toJson(), original.toJson());
     expect(restored.responses[mask.key]!.ink.single.last, const Offset(0.8, 0.9));
+  });
+  test('Legacy unversioned study data migrates without losing answers', () {
+    const mask = ClozeMask(Rect.fromLTWH(0.1, 0.2, 0.3, 0.1), answer: '答案');
+    final legacy = ClozeState(masks: [mask], note: '旧笔记',
+      responses: {mask.key: StudyResponse(text: '旧回答')}).toJson()
+      ..remove('schemaVersion');
+    final migrated = ClozeState.fromJson(legacy);
+    expect(migrated.note, '旧笔记');
+    expect(migrated.masks.single.answer, '答案');
+    expect(migrated.responses[mask.key]!.text, '旧回答');
+    expect(migrated.toJson()['schemaVersion'], ClozeState.schemaVersion);
+    expect(() => ClozeState.fromJson({...legacy, 'schemaVersion': 2}),
+      throwsFormatException);
   });
   test('Rule merge retains answers and removes only the deleted answer', () {
     const a = ClozeMask(Rect.fromLTWH(0, 0, 0.2, 0.1));

@@ -95,6 +95,13 @@ class EditorHistory {
     _lastSaved = _past.lastOrNull;
   }
 
+  /// The change represented by a serialized snapshot before an async write.
+  EditorHistoryItem? get currentChange => _past.lastOrNull;
+
+  void markSnapshotAsSaved(EditorHistoryItem? change) {
+    _lastSaved = change;
+  }
+
   /// Whether the current state is saved to disk.
   ///
   /// Note that this explicitly checks the last change in the history,

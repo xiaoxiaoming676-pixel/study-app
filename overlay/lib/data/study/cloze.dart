@@ -33,6 +33,9 @@ class ClozeMask {
 
 /// Immutable state: history items must not share mutable lists.
 class ClozeState {
+  /// Version 0 had no marker. It is read using the same fields and defaults.
+  static const schemaVersion = 1;
+
   new({List<ClozeMask> masks = const [], this.hidden = true,
       this.text = '', this.note = '', Map<String, StudyResponse> responses = const {},
       this.showResponses = true, this.speechOffset = 0})
@@ -45,9 +48,13 @@ class ClozeState {
   final bool showResponses;
   final int speechOffset;
 
-  factory fromJson(Map<String, dynamic>? json) => json == null
-      ? ClozeState()
-      : ClozeState(
+  factory fromJson(Map<String, dynamic>? json) {
+    if (json == null) return ClozeState();
+    final version = json['schemaVersion'] ?? 0;
+    if (version is! int || version < 0 || version > schemaVersion) {
+      throw const FormatException('Unsupported study record version');
+    }
+    return ClozeState(
           masks: (json['masks'] as List? ?? []).map((m) =>
               ClozeMask.fromJson(Map<String, dynamic>.from(m as Map))).toList(),
           hidden: json['hidden'] as bool? ?? true,
@@ -57,8 +64,10 @@ class ClozeState {
           speechOffset: (json['speechOffset'] as num? ?? 0).toInt().clamp(0, 10000000).toInt(),
           responses: (json['responses'] as Map? ?? {}).map((key, value) =>
               MapEntry(key as String, StudyResponse.fromJson(Map<String, dynamic>.from(value as Map)))));
+  }
 
   Map<String, dynamic> toJson() => {
+    'schemaVersion': schemaVersion,
     'masks': masks.map((m) => m.toJson()).toList(),
     'hidden': hidden,
     'text': text,
