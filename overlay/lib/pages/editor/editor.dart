@@ -999,11 +999,10 @@ class EditorState extends State<Editor> {
     );
     final thumbnailPng = await thumbnail.toByteData(format: .png);
     thumbnail.dispose();
-    await FileManager.writeFile(
+    await writeNoteAssetAtomically(
       // Note that this ends with .sbn2.p
       '$filePath.p',
       thumbnailPng!.buffer.asUint8List(),
-      awaitWrite: true,
     );
   }
 

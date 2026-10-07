@@ -146,3 +146,9 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 2026-10-07 公开真实 corpus 已在 Windows 本机建立并固定：①《动手学深度学习》中文文字 PDF，813 页、32671481 字节；② Library of Congress 公共领域扫描教材，160 页、39754146 字节；③ Illinois DoIT 复杂 PPTX 与官方 PowerPoint PDF 对照件，各 5 页；④由已校验真实扫描页生成的一页受控高亮/下划线样本。`real_corpus.json` 记录 HTTPS 来源、用途/许可说明、SHA256、字节数、页数和覆盖项；大文件留在被忽略的 `quality/private/real/`，没有提交到公开仓库。下载/派生/校验脚本具备临时文件、固定大小、SHA256 和页数检查。本机完整教材与质量测试 17/17 通过，固定 corpus 全部再次校验成功。
 
 同一 `@aiden0z/pptx-renderer` 1.3.0 与桥接页面在本机 Edge 离线转换 Illinois 真实课件，和官方 PDF 比较的逐页 RGB MAE 为 1.444、4.296、2.227、2.949、3.089，平均 2.801/255、最差 4.296，最低文字字符召回率 1.0，所有暂定门槛通过；人工抽查图表页确认月份、图例、数值、颜色和图片保留。下一提交把这份小型真实课件按固定哈希下载到 iOS CI，要求 iPhone/iPad 离线转换、图表关键词坐标和 iPhone 官方 PDF 质量门槛同时通过；当前这部分代码已由固定 Dart SDK 静态检查 `No issues found!` 和本机 17/17 Python 测试验证，云端 iOS 结果仍待提交后取得。
+
+2026-10-07 晚间恢复：`90d40f7` 的 Windows 验证 `37600320542`（6 分 38 秒）及 Windows EXE `37600320450`（1 分 6 秒）绿色；[iOS 37600320442](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37600320442) 最终失败。已读取作业 `112722823015` 完整日志：iPhone 学习流程、120 页合成 PDF、iPhone/iPad 离线 PPTX 均为 `All tests passed!`，两种模拟器均记录 `STUDY_REAL_PPTX:pages=5 labels=3 masks=3`。真实 Illinois PPTX 的 iPhone 视觉比较平均 RGB MAE 3.959/255、最差 6.997/255、最低字符召回率 1.0、页数和比例通过，`passed=true`。这是固定公开样本的模拟器证据，不能替代用户教材准确率或真机验收。
+
+本轮唯一业务失败是 iPad 学习流程读取首页 `.sbn2.p` 缩略图时出现 `Invalid image data`。源码确认缩略图仍直接截断写入，首页可能在写入间隙读取它；现让该写入复用现有 `writeNoteAssetAtomically`，保持文件名、PNG 格式和通知行为。新增故障注入：暂存 PNG 截断后中断写入，验证正式路径仍为完整旧 PNG 且可解码，重试后新 PNG 完整落盘。Windows 本机完整源码范围静态分析无问题；抽取未改动原子替换函数的独立 Flutter 回归环境 2/2 通过。完整 App 测试与 iOS 模拟器复验待新提交 CI；未绕过现有测试或建立新稳定 tag。
+
+真实大文件测试草稿已保存在本机忽略目录 `build/pending-real-stress/`：160 页、39754146 字节 LoC 扫描 PDF，记录导入/分析/保存/重开耗时和进程 RSS，并在打包前删除测试教材。Dart 静态分析与 YAML 解析通过，但尚未接入当前 CI；先修复上述真实失败项再启用。该扫描件带历史 OCR 层，分析耗时不能标为纯 Vision OCR 耗时；取消、内存保护、重开 PDF 资产完整性及独立 OCR 压测仍需加强。草稿没有更改 PDF 学习系统。稳定回退点仍为 `study-pptx-ocr-2026-10-07`（`449294c`）。之前聊天的约 82% 是粗略工程估算，非正式验收百分比；签名、真机和真实压力项目仍未完成。

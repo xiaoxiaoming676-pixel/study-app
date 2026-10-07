@@ -1,5 +1,7 @@
 # Windows 本地任务交接 · Study iOS App
 
+> 2026-10-07 晚间恢复入口：以 `BUILD_PROGRESS.md` 末尾为准。稳定 tag 为 `study-pptx-ocr-2026-10-07`（449294c）。90d40f7 的 Windows 两条 CI 绿色；iOS 37600320442 的真实 PPTX 双模拟器和质量门槛通过，但 iPad 首页读取半写入缩略图失败。最新修复让缩略图复用现有原子保存，静态分析及独立故障注入 2/2 通过，等待 CI。真实 160 页大文件测试草稿暂存在本机 `build/pending-real-stress/`，先恢复绿色，再接入压测。用户仍无苹果设备；BrowserStack 仅上传验证，正式签名未启用。
+
 更新：2026-10-05。仓库：https://github.com/xiaoxiaoming676-pixel/study-app ，最新已完成跨平台验证的代码提交：`8c4d25f4c7d0819bab8eb35121231a88fa6390d7`；请以仓库实时 main 为准。
 
 本次 Windows 接手新增提交包括 `bdd2dd9ac623117627e0c9850f0fa6a962fa4149`（PowerPoint 教材转换及本地测试）、`37f437059737030be2f4e5e6ccd045259ffa614f`（独立 Windows Flutter 验证工作流）及 `8c4d25f4c7d0819bab8eb35121231a88fa6390d7`（模拟器测试点击时序修复）。详见 `BUILD_PROGRESS.md`。
