@@ -172,6 +172,9 @@ void main() {
     await waitFor(tester, find.text('本页长期笔记'));
     await tester.enterText(find.byType(TextField).last, '这段需要复习');
     await tester.tap(find.text('完成'));
+    // Rebuild the saving indicator before inspecting it: the previous saved
+    // label can still be in the widget tree until this frame is rendered.
+    await tester.pump();
     await waitFor(tester, find.text('已保存'));
 
     final saved = await EditorCoreInfo.loadFromFilePath(notePath);

@@ -120,6 +120,11 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 
 阶段 3 合成大文件验收准备：复用固定的 120 页 PDF 作为 iOS 测试资源，新增独立模拟器用例记录导入毫秒、保存毫秒及进程 RSS 高水位，并验证关闭重开仍有 120 页、无效 PDF 导入不破坏原教材。该 PDF 仅 94,448 字节，测得到页数扩展和恢复路径，**测不到几十 MB 扫描教材的真实内存压力**；取消与真实扫描教材误检/漏检仍待专门样本和测试。
 
-2026-10-06 最新核查：提交 `db23867` 的 [iOS 运行 37474771689](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37474771689) 最终标为失败，但 Flutter 静态分析、单元测试、iPhone/iPad PDF 与 PPTX 集成测试、PowerPoint 视觉比较、无签名 IPA 构建、模拟器应用安装启动和 ZIP 归档步骤均显示成功。失败发生于末尾的 `Enforce simulator test result`：该较早提交的工作流已引用当时尚不存在的 `large_pdf_flow` 步骤，导致汇总条件判失败，不能称该运行整体绿色。无签名 IPA [归档 11421145031](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37474771689/artifacts/11421145031) 和模拟器 ZIP [归档 11420502988](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37474771689/artifacts/11420502988) 均已上传。当前提交 `cb98496` 已加入对应的 120 页测试步骤；[Windows 运行 37476926902](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37476926902) 绿色，[iOS 运行 37476926700](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37476926700) 排队，待验证新测试及末尾汇总。
-
+2026-10-06 初步核查（2026-10-07 已纠正）：此前只按步骤 conclusion=success 推断 db23867 的 iOS 流程通过，并将末尾失败错误归因于不存在的 large_pdf_flow，该推断不成立。该提交的工作流没有引用 large_pdf_flow；完整日志确认 iPhone/iPad 均在长期笔记持久化断言失败（期望“这段需要复习”，实际为空），continue-on-error 将步骤 conclusion 包装为成功。PPTX 两次集成测试确有 All tests passed；IPA 与模拟器 ZIP 构建上传成功，但不能称整轮验收通过。Windows 37476926902 绿色，iOS 37476926700 的实际失败见下方收口记录。
 阶段 5 BrowserStack 试跑：用户已登录 App Live，平台接受旧版绿色构建 `aada5dc` 的无签名 IPA 上传并显示为应用。免费 iPhone 会话在启动时提示可用试用时段已用完，未取得安装、启动或功能操作的真机证据；因此真机 smoke test 仍待可用测试时段。上传的旧包也不包含后续阶段 4 的数据保存修复。
+
+2026-10-07 收口第一轮：已读取指定 [iOS 运行 37476926700](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37476926700) 的最终状态及完整作业日志。整轮失败，真实失败项为：① iPhone/iPad 的 study_flow_test.dart:180 提前读取长期笔记（期望内容，实际为空）；② 120 页测试在坏 PDF 加载错误被调用者捕获后，缓存释放再次传播同一失败。两次 PPTX 测试、视觉比较、unsigned IPA 和 simulator ZIP 构建均成功。未建立新稳定 tag。
+
+仅针对失败项修复：长期笔记测试在输入并关闭弹窗后先 pump 一帧，避免命中尚未刷新的旧“已保存”标签，保留原持久化断言；覆盖上游 PDF 缓存的失败处理，加载失败时移除缓存，允许修复同一路径后重试，并处理释放与失败加载竞态，不改文档存储或 PDF 学习架构。增加失败后重试、失败加载期间释放、并发加载单次释放三个回归测试。Windows 本机对改动范围执行固定 Dart/Flutter 静态分析无问题；同版本 PDF 依赖的独立 Flutter 测试环境 3/3 通过。完整 App 本机测试因缺 Rust 工具链未执行成功，须由现有 Windows/iOS CI 复验；未把独立测试等同于模拟器验收。
+
+上述失败运行仍留下合成 120 页测量：94448 字节、导入 3660 ms、保存 1400 ms、进程峰值 RSS 745799680 字节。该值是调试模拟器的进程高水位，包含运行环境且样本很小；失败恢复尚未通过，不能当作真实大型扫描教材性能通过。下一步先复验这两个失败项，绿色后对实际通过的提交建立验收基线，再按用户顺序做 PPTX 图表 OCR、真实教材 corpus、大文件压力和保存故障注入。
