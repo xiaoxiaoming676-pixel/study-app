@@ -59,6 +59,19 @@ jobs:
           rm assets/images/pptx_renderer.js
           cp /tmp/study-pptx-renderer/package/LICENSE assets/images/pptx_renderer.LICENSE
           cp ../study/overlay/tools/study/quality/fixtures/deck_complex.pptx assets/images/deck_complex.pptx
+          curl --fail --location --silent --show-error \
+            --output assets/images/real_corpus_illinois.pptx \
+            https://doit-accessibility.github.io/exercises/powerpoint-example-1.pptx
+          printf '%s  %s\n' \
+            '7aa1d7668e39ee9949eded6f4a88ecafbb125de90ae342ab76b838d43f3e45c6' \
+            assets/images/real_corpus_illinois.pptx | shasum -a 256 -c -
+          mkdir -p /tmp/study-real-corpus
+          curl --fail --location --silent --show-error \
+            --output /tmp/study-real-corpus/illinois-office-supply.pdf \
+            https://doit-accessibility.github.io/exercises/powerpoint-example-1.pdf
+          printf '%s  %s\n' \
+            'f5788c1f630044f4663b72900ca9c9bfc827b3be8252d4e80345daa2838ecc87' \
+            /tmp/study-real-corpus/illinois-office-supply.pdf | shasum -a 256 -c -
           rm -f "$package"
       - name: Set study app identity
         run: |
@@ -138,6 +151,9 @@ jobs:
           flutter test integration_test/pptx_offline_test.dart -d "$STUDY_SIM_ID" --reporter expanded | tee build/study/pptx-test.log
           python3 ../study/overlay/tools/study/quality/extract_logged_pdf.py \
             build/study/pptx-test.log build/study/pptx-simulator.pdf
+          python3 ../study/overlay/tools/study/quality/extract_logged_pdf.py \
+            build/study/pptx-test.log build/study/pptx-real-simulator.pdf \
+            --prefix STUDY_REAL_PDF
       - name: Set up Python for PPTX visual comparison
         if: steps.pptx_flow.outcome == 'success'
         uses: actions/setup-python@v7
@@ -155,6 +171,11 @@ jobs:
             build/study/pptx-simulator.pdf \
             --reference ../study/overlay/tools/study/quality/fixtures/deck_complex_powerpoint.pdf \
             --output build/study/pptx-quality.json
+          python ../study/overlay/tools/study/quality/evaluate.py \
+            build/study/pptx-real-simulator.pdf \
+            --reference /tmp/study-real-corpus/illinois-office-supply.pdf \
+            --output build/study/pptx-real-quality.json \
+            --gate
           python - <<'PY'
           import json
           from pathlib import Path
@@ -170,6 +191,8 @@ jobs:
           path: |
             source/build/study/pptx-simulator.pdf
             source/build/study/pptx-quality.json
+            source/build/study/pptx-real-simulator.pdf
+            source/build/study/pptx-real-quality.json
             source/build/study/pptx-test.log
           if-no-files-found: warn
           retention-days: 14

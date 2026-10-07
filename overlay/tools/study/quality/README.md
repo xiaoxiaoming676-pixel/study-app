@@ -27,8 +27,18 @@ python overlay/tools/study/quality/evaluate.py candidate.pdf --gate --output qua
 
 再运行 `python overlay/tools/study/quality/score_scan.py predictions.json --output scan-report.json`。词语相同且位置交并比至少 0.25 才算命中；报告分别列出 TP、FP、FN、精确率、召回率以及误检和漏检详情。真实样本应人工标注词语与页面归一化框，再用 `--expected` 指定标注 JSON。
 
-## 真实教材接收与验收
+## 公开真实教材 corpus
 
-目前**尚无用户许可的真实教材样本**。取得已去隐私且获准测试的样本后，放在不提交的本机 `quality/private/`。为每份 PDF、扫描件和 PPTX 记录：来源及许可、SHA256、页数、页面方向、字体/图表/公式类型、人工标注的重点位置；PPTX 还要用本机 PowerPoint 导出参考 PDF。每次转换保存工具版本、设备/模拟器、耗时、峰值内存、是否取消、失败提示和恢复结果。每种扫描规则按页报告 FP/FN；PPTX 按页报告视觉指标并人工审查图表与公式。100 页以上文件分别测试导入、翻页、保存、取消和异常后的原文件/笔记完整性。真实样本结果另存本机，不把私人教材或标注上传到公开仓库。
+`real_corpus.json` 固定三组公开来源：813 页中文文字教材、160 页公共领域扫描教材、Illinois DoIT 的 5 页复杂 PPTX 及其 PowerPoint PDF 对照件。清单记录下载地址、来源页、许可/用途说明、SHA256、字节数、页数与覆盖能力；大文件保存在被忽略的 `quality/private/real/`，不提交到仓库。
+
+```sh
+python overlay/tools/study/quality/real_corpus.py
+python overlay/tools/study/quality/real_corpus.py --derive
+python overlay/tools/study/quality/real_corpus.py --verify-only
+```
+
+第一条命令下载或校验固定文件；第二条从已校验的公共领域扫描教材第 5 页生成一页“真实底页＋受控高亮/下划线”样本；第三条只读校验本机 corpus。受控标记用于给颜色和近似下划线检测提供已知位置，不能冒充自然形成的学生批注。Illinois 课件由官方练习页同时提供 PPTX 与“Save As PDF”对照件，适合逐页视觉、文字和字体替换比较。
+
+以后取得已去隐私且获准测试的用户样本时，仍放在不提交的本机 `quality/private/`。为每份教材记录来源及许可、SHA256、页数、页面方向、字体/图表/公式类型、人工标注的重点位置。每次转换保存工具版本、设备/模拟器、耗时、峰值内存、是否取消、失败提示和恢复结果。每种扫描规则按页报告 FP/FN；PPTX 按页报告视觉指标并人工审查图表与公式。100 页以上文件分别测试导入、翻页、保存、取消和异常后的原文件/笔记完整性。真实样本结果另存本机，不把私人教材或标注上传到公开仓库。
 
 `make_corpus.py` 用于有 PowerPoint 的 Windows 开发机有意重建合成样本；重建会改变 corpus SHA256，必须重新审查差异后提交。自动测试只校验已固定的文件，不在 CI 中重新生成参考 PDF。

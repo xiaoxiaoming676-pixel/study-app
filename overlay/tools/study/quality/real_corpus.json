@@ -1,0 +1,106 @@
+{
+  "schema": "study-real-corpus/1",
+  "storage": "private/real",
+  "files": {
+    "d2l-zh.pdf": {
+      "kind": "text_pdf",
+      "url": "https://zh.d2l.ai/d2l-zh.pdf",
+      "source_page": "https://zh.d2l.ai/",
+      "sha256": "632eee9582b967f5de7bf1927244366683a06db4544fe2364147aa9fbe58e146",
+      "bytes": 32671481,
+      "pages": 813,
+      "license": "CC-BY-SA-4.0 and MIT-0",
+      "credit": "Aston Zhang, Zachary C. Lipton, Mu Li, Alexander J. Smola, and contributors",
+      "coverage": [
+        "selectable_text",
+        "chinese",
+        "chinese_fonts",
+        "formula",
+        "chart",
+        "image",
+        "over_100_pages"
+      ]
+    },
+    "illinois-office-supply.pptx": {
+      "kind": "pptx",
+      "url": "https://doit-accessibility.github.io/exercises/powerpoint-example-1.pptx",
+      "source_page": "https://doit.illinois.gov/initiatives/accessibility/guides/powerpoint.html",
+      "sha256": "7aa1d7668e39ee9949eded6f4a88ecafbb125de90ae342ab76b838d43f3e45c6",
+      "bytes": 147193,
+      "pages": 5,
+      "license": "State of Illinois exercise download; retain at source or local test storage",
+      "credit": "Illinois Department of Innovation & Technology",
+      "reference": "illinois-office-supply.pdf",
+      "coverage": [
+        "pptx",
+        "chart",
+        "table",
+        "image",
+        "shape",
+        "font_substitution",
+        "powerpoint_ground_truth"
+      ]
+    },
+    "illinois-office-supply.pdf": {
+      "kind": "reference_pdf",
+      "url": "https://doit-accessibility.github.io/exercises/powerpoint-example-1.pdf",
+      "source_page": "https://doit.illinois.gov/initiatives/accessibility/guides/powerpoint.html",
+      "sha256": "f5788c1f630044f4663b72900ca9c9bfc827b3be8252d4e80345daa2838ecc87",
+      "bytes": 188943,
+      "pages": 5,
+      "license": "State of Illinois exercise download; retain at source or local test storage",
+      "credit": "Illinois Department of Innovation & Technology",
+      "coverage": [
+        "powerpoint_ground_truth"
+      ]
+    },
+    "loc-scanned-textbook.pdf": {
+      "kind": "scanned_pdf",
+      "url": "https://tile.loc.gov/storage-services/public/gdcmassbookdig/selectionoftextb01maxw/selectionoftextb01maxw.pdf",
+      "source_page": "https://www.loc.gov/item/04003837/",
+      "rights_page": "https://data.labs.loc.gov/digitized-books/",
+      "sha256": "fe841d254d889809b720d14987a8b79003e0afd21cabd0bbd1ca8667b5e7f6e8",
+      "bytes": 39754146,
+      "pages": 160,
+      "license": "Public domain; free to use and reuse",
+      "credit": "Library of Congress",
+      "coverage": [
+        "scanned_pdf",
+        "noisy_ocr_layer",
+        "historic_font",
+        "image",
+        "over_100_pages"
+      ]
+    }
+  },
+  "derived": {
+    "loc-scanned-controlled-marks.pdf": {
+      "kind": "controlled_marks_on_real_scan",
+      "source": "loc-scanned-textbook.pdf",
+      "generator": "real_corpus.py",
+      "generator_version": 1,
+      "sha256": "5e93be86518e85f64bf370384172d0781e5de0eeff39e476117993a54feb1df0",
+      "bytes": 261553,
+      "pages": 1,
+      "coverage": [
+        "scanned_pdf",
+        "highlight",
+        "underline"
+      ],
+      "expected_marks": {
+        "highlight": [
+          0.17,
+          0.225,
+          0.83,
+          0.305
+        ],
+        "underline": [
+          0.32,
+          0.445,
+          0.72,
+          0.445
+        ]
+      }
+    }
+  }
+}

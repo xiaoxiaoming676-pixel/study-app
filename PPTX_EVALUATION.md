@@ -39,3 +39,15 @@ App 内原型把独立 ESM 和 Apache-2.0 许可文件在构建时打包，运�
 下一轮 [iOS 运行 37434382755](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37434382755) 进入了 iPhone PPTX 测试后的视觉比较，但比较步骤退出码 2，未留下模拟器 PDF 与 JSON 评分归档，整条运行仍红色。现将测试生成的固定合成 PDF 从测试日志分块传出，严格校验完整性后再运行现有 PowerPoint 视觉比较；不依赖测试完成后 App 临时容器是否仍存在。下一轮需检查 iPhone 与 iPad 测试原始结果、输出 PDF、逐页分数和最终运行结论。ZIP 限制进一步收紧为单项 16 MiB、总解压 96 MiB、媒体 64 MiB、并发 2；本机高压缩比越限样本被拦截，正常四页样本仍能打开。真实教材质量和 100 页手机性能尚无证据。
 
 提交 `aada5dc` 的 [iOS 运行 37444388719](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37444388719) 已整体绿色，iPhone、iPad 离线转换测试及 iPhone 视觉比较步骤均成功；模拟器 PDF 与评分见 [合成比较归档 11403134528](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37444388719/artifacts/11403134528)。逐页 RGB MAE 为 2.690、0.730、2.541、2.916（满量程 255），平均 2.219；四页页数与比例均通过。第 3 页图表以画面方式绘出，月份标签肉眼可见，但 PDF 提取文字为零，完整质量检查 `passed=false`。这不影响将 PDF 交给现有学习页浏览和手写，但关键词/挖空能否准确处理图表标签还需验证；不能以视觉分数代替真实教材语义质量。尚无真实教材，暂不据此切换 Pagus 或云端服务。
+
+## 图表文字 Vision 兜底（2026-10-07）
+
+原逻辑只在整页没有 PDF 可提取文字时运行 Vision，会漏掉“可选标题＋图像图表标签”的混排页。现保留 PDFKit 的可选文字与精确坐标，仅对用户关键词中 PDFKit 未找到的词补充 Vision OCR；纯扫描页的颜色、高亮和近似下划线仍走原有完整 Vision 路径。没有建立第二套 PPTX 学习系统。
+
+提交 `449294c` 的 [Windows 运行 37592007964](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37592007964) 与 [iOS 运行 37592007949](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37592007949) 均整体绿色，iPhone/iPad 两次 PPTX 测试和最终强制检查通过。iPhone PPTX 测试日志记录 `STUDY_PPTX_OCR:page=3 labels=3 masks=3` 并以 `All tests passed!` 结束，证明图表页“一月、二月、三月”均由现有分析通道返回归一化坐标。对应 [比较归档 11469798245](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37592007949/artifacts/11469798245) 的 GitHub ZIP SHA256 为 `1da0b6554abb5179f1e5e55d2d242110f61bb7e1ad21dac8f988acc57f78d401`。模拟器 PDF 的平均 RGB MAE 为 2.178/255、最差页 2.916；第 3 页原始 PDF 文字提取召回仍为 0，所以通用 PDF 文本门槛仍显示失败，但 App 的关键词/挖空语义路径已经由 Vision 兜底通过。两项指标必须分别保留，不能把 OCR 成功改写成 PDF 内嵌文字成功。经过测试的提交已建立 annotated tag `study-pptx-ocr-2026-10-07`。
+
+## 公开真实课件（2026-10-07）
+
+固定公开 corpus 新增 Illinois DoIT 的 5 页 Office Supply 练习课件及其官方 PowerPoint “Save As PDF”对照件，课件包含图片、柱状图、表格和流程形状。文件只从官方练习页按固定 SHA256 下载到本机忽略目录；仓库记录来源、大小、页数和校验值，不提交原始大文件。
+
+在 Windows Edge 中用与 App 相同的离线 `@aiden0z/pptx-renderer` 1.3.0 和桥接页面转换，5 页页数、16:9 比例和文字均与官方 PDF 对照通过。逐页 RGB MAE 为 1.444、4.296、2.227、2.949、3.089，平均 2.801/255，最差 4.296，最低文字字符召回率 1.0；人工并排抽查图表页确认月份、图例、数值、柱体颜色和底部图片都保留。下一轮 iOS CI 会先校验官方 PPTX/PDF 哈希，再在 iPhone/iPad 内离线转换真实课件并对 iPhone 结果运行同一质量门槛；在该轮完成前，这组 Windows 结果不代替 iOS WebKit 结果。

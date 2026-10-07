@@ -9,6 +9,7 @@ import fitz
 
 from quality.evaluate import compare
 from quality.extract_logged_pdf import extract
+from quality.real_corpus import derive_controlled_marks, sha256, verify_file
 from quality.score_scan import score
 
 QUALITY = Path(__file__).resolve().parent / 'quality'
@@ -69,8 +70,54 @@ class QualityCorpusTests(unittest.TestCase):
                      for index, chunk in enumerate(chunks))
         lines.append('STUDY_PDF_END')
         self.assertEqual(extract('\n'.join(lines)), source)
+        real_lines = [line.replace('STUDY_PDF', 'STUDY_REAL_PDF') for line in lines]
+        self.assertEqual(extract('\n'.join(real_lines), 'STUDY_REAL_PDF'), source)
         with self.assertRaises(ValueError):
             extract('\n'.join(lines[0:2] + lines[3:]))
+
+    def test_real_corpus_manifest_covers_the_finalization_matrix(self):
+        manifest = json.loads((QUALITY / 'real_corpus.json').read_text(encoding='utf-8'))
+        self.assertEqual(manifest['schema'], 'study-real-corpus/1')
+        entries = {**manifest['files'], **manifest['derived']}
+        coverage = {item for entry in entries.values() for item in entry['coverage']}
+        self.assertTrue({
+            'selectable_text', 'scanned_pdf', 'pptx', 'formula', 'chart', 'image',
+            'chinese_fonts', 'highlight', 'underline', 'over_100_pages',
+            'powerpoint_ground_truth',
+        }.issubset(coverage))
+        for name, entry in entries.items():
+            with self.subTest(name=name):
+                self.assertEqual(len(entry['sha256']), 64)
+                int(entry['sha256'], 16)
+                self.assertGreater(entry['bytes'], 0)
+                self.assertGreater(entry['pages'], 0)
+                if 'url' in entry:
+                    self.assertTrue(entry['url'].startswith('https://'))
+                    self.assertTrue(entry['source_page'].startswith('https://'))
+
+    def test_real_corpus_verifier_and_controlled_marks_are_reproducible(self):
+        source = FIXTURES / 'text_styles.pdf'
+        expected = {
+            'kind': 'text_pdf',
+            'bytes': source.stat().st_size,
+            'sha256': sha256(source),
+            'pages': 2,
+        }
+        self.assertEqual(verify_file(source, expected), [])
+        with tempfile.TemporaryDirectory() as temp:
+            corrupt = Path(temp) / 'corrupt.pdf'
+            corrupt.write_bytes(source.read_bytes() + b'changed')
+            errors = verify_file(corrupt, expected)
+            self.assertTrue(any(error.startswith('bytes:') for error in errors))
+            self.assertTrue(any(error.startswith('sha256:') for error in errors))
+
+            first = Path(temp) / 'marks-1.pdf'
+            second = Path(temp) / 'marks-2.pdf'
+            derive_controlled_marks(FIXTURES / 'large_120_pages.pdf', first)
+            derive_controlled_marks(FIXTURES / 'large_120_pages.pdf', second)
+            self.assertEqual(sha256(first), sha256(second))
+            with fitz.open(first) as document:
+                self.assertEqual(len(document), 1)
 
 
 if __name__ == '__main__':

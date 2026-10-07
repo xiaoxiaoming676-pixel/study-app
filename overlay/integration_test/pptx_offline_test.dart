@@ -23,6 +23,23 @@ Future<void> waitFor(WidgetTester tester, Finder target) async {
   expect(target, findsWidgets);
 }
 
+void emitPdf(String prefix, List<int> bytes) {
+  final encoded = base64Encode(bytes);
+  const chunkSize = 3072;
+  final chunks = (encoded.length + chunkSize - 1) ~/ chunkSize;
+  debugPrintSynchronously('${prefix}_BEGIN:${bytes.length}:$chunks');
+  for (var index = 0; index < chunks; index++) {
+    final start = index * chunkSize;
+    final end = start + chunkSize < encoded.length
+        ? start + chunkSize
+        : encoded.length;
+    debugPrintSynchronously(
+      '${prefix}_CHUNK:$index:${encoded.substring(start, end)}',
+    );
+  }
+  debugPrintSynchronously('${prefix}_END');
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -47,20 +64,7 @@ void main() {
     pdf.dispose();
     // Flutter may remove the test app before a later CI step can read its tmp directory.
     // Emit only this fixed synthetic PDF so CI can score the actual WebKit output.
-    final encoded = base64Encode(pdfBytes);
-    const chunkSize = 3072;
-    final chunks = (encoded.length + chunkSize - 1) ~/ chunkSize;
-    debugPrintSynchronously('STUDY_PDF_BEGIN:${pdfBytes.length}:$chunks');
-    for (var index = 0; index < chunks; index++) {
-      final start = index * chunkSize;
-      final end = start + chunkSize < encoded.length
-          ? start + chunkSize
-          : encoded.length;
-      debugPrintSynchronously(
-        'STUDY_PDF_CHUNK:$index:${encoded.substring(start, end)}',
-      );
-    }
-    debugPrintSynchronously('STUDY_PDF_END');
+    emitPdf('STUDY_PDF', pdfBytes);
 
     FlavorConfig.setupFromEnvironment();
     disableSentryForTesting();
@@ -119,6 +123,57 @@ void main() {
       4,
     );
 
+    // This public Illinois DoIT exercise has images, a chart, a table and
+    // process shapes, plus an official PowerPoint PDF reference. Keep the file
+    // out of git; CI downloads it and verifies its fixed hash before bundling.
+    final realFixture =
+        await rootBundle.load('assets/images/real_corpus_illinois.pptx');
+    final realInput =
+        File('${Directory.systemTemp.path}/study-real-illinois.pptx');
+    await realInput.writeAsBytes(
+      realFixture.buffer.asUint8List(),
+      flush: true,
+    );
+    final realPath = await channel.invokeMethod<String>('convert', {
+      'path': realInput.path,
+    }).timeout(const Duration(minutes: 3));
+    expect(realPath, isNotNull);
+    final realOutput = File(realPath!);
+    final realPdfBytes = await realOutput.readAsBytes();
+    final realPdf = await PdfDocument.openData(realPdfBytes);
+    expect(realPdf.pages.length, 5);
+    for (final page in realPdf.pages) {
+      expect(page.width / page.height, closeTo(16 / 9, 0.02));
+    }
+    realPdf.dispose();
+    emitPdf('STUDY_REAL_PDF', realPdfBytes);
+
+    final realChartResult = await studyChannel.invokeMapMethod<String, dynamic>(
+      'analyze',
+      {
+        'bytes': realPdfBytes,
+        'page': 2,
+        'keywords': ['January', 'February', 'March'],
+        'bold': false,
+        'underline': false,
+        'highlight': false,
+        'color': '',
+      },
+    );
+    final realChartMasks = (realChartResult?['masks'] as List? ?? [])
+        .map((mask) => Map<String, dynamic>.from(mask as Map))
+        .toList();
+    for (final label in ['January', 'February', 'March']) {
+      expect(
+        realChartMasks.any((mask) => mask['answer'] == label),
+        isTrue,
+      );
+    }
+    debugPrintSynchronously(
+      'STUDY_REAL_PPTX:pages=5 labels=3 masks=${realChartMasks.length}',
+    );
+
     await input.delete();
+    await realInput.delete();
   });
 }
