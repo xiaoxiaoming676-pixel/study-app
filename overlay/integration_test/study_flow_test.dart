@@ -147,6 +147,22 @@ void main() {
     expect(underlineMasks.any((mask) => (mask as Map)['answer'].toString().contains('Alpha')),
         isFalse, reason: 'Text without an underline should stay unselected');
 
+    // A mixed page can have selectable body text but raster-only chart labels.
+    // Missing keywords must still use Vision without replacing PDFKit's text.
+    final mixed = pw.Document();
+    mixed.addPage(pw.Page(build: (_) => pw.Column(children: [
+      pw.Text('Selectable heading'),
+      pw.Image(pw.MemoryImage(rasterBytes!.buffer.asUint8List())),
+    ])));
+    final mixedResult = await channel.invokeMapMethod<String, dynamic>('analyze', {
+      'bytes': await mixed.save(), 'page': 0, 'keywords': ['Alpha'],
+      'bold': false, 'underline': false, 'highlight': false, 'color': '',
+    });
+    expect(mixedResult?['text'], contains('Selectable heading'));
+    expect(mixedResult?['text'], contains('Alpha'));
+    final mixedMasks = (mixedResult?['masks'] as List?) ?? [];
+    expect(mixedMasks.any((mask) => (mask as Map)['answer'] == 'Alpha'), isTrue);
+
     await tester.tap(find.byTooltip('学习：挖空与朗读'));
     await waitFor(tester, find.byType(StudyPanel));
     final clozeTab = find.text('挖空').last.hitTestable();

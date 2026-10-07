@@ -170,6 +170,7 @@ jobs:
           path: |
             source/build/study/pptx-simulator.pdf
             source/build/study/pptx-quality.json
+            source/build/study/pptx-test.log
           if-no-files-found: warn
           retention-days: 14
       - name: Boot available iPad simulator

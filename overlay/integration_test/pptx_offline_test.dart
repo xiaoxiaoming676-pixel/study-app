@@ -66,6 +66,38 @@ void main() {
     disableSentryForTesting();
     await saber.appRunner(const []);
     await waitFor(tester, find.byType(HomePage));
+    // Chart labels are rendered into the slide image and are not selectable PDF
+    // text. Verify that the existing Vision channel supplies text and coordinates
+    // before the converted PDF enters the normal study system.
+    const studyChannel = MethodChannel('study.local/pdf_speech');
+    final chartResult = await studyChannel.invokeMapMethod<String, dynamic>(
+      'analyze',
+      {
+        'bytes': pdfBytes,
+        'page': 2,
+        'keywords': ['一月', '二月', '三月'],
+        'bold': false,
+        'underline': false,
+        'highlight': false,
+        'color': '',
+      },
+    );
+    final chartText = chartResult?['text'] as String? ?? '';
+    final chartMasks = (chartResult?['masks'] as List? ?? [])
+        .map((mask) => Map<String, dynamic>.from(mask as Map))
+        .toList();
+    for (final label in ['一月', '二月', '三月']) {
+      expect(chartText, contains(label));
+      expect(chartMasks.any((mask) => mask['answer'] == label), isTrue);
+    }
+    for (final mask in chartMasks) {
+      final rect = (mask['rect'] as List).cast<num>();
+      expect(rect, hasLength(4));
+      expect(rect.every((value) => value >= 0 && value <= 1), isTrue);
+    }
+    debugPrintSynchronously(
+      'STUDY_PPTX_OCR:page=3 labels=3 masks=${chartMasks.length}',
+    );
     final notePath = await FileManager.newFilePath('/');
     GoRouter.of(tester.element(find.byType(HomePage)))
         .push(RoutePaths.editImportPdf(notePath, output.path));

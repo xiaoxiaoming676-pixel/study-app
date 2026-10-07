@@ -276,11 +276,23 @@ import workmanager_apple
             DispatchQueue.main.async { result(FlutterError(code: "GEOMETRY", message: "旋转或裁切 PDF 请使用手动框选，或先规范化页面", details: nil)) }; return
           }
           let extractedText = page.string ?? ""
-          let scan = extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            ? Self.recognizeScannedPage(page, bounds: bounds, keywords: keywords,
-                color: wantedColor, highlight: highlight, underline: underline)
+          let isRasterOnly = extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+          // PPTX charts are commonly printed as pixels while the surrounding slide
+          // title remains selectable. OCR only the requested keywords PDFKit cannot
+          // find, so mixed pages keep their precise PDF selections without losing
+          // chart labels.
+          let missingKeywords = keywords.filter {
+            extractedText.range(of: $0, options: [.caseInsensitive, .diacriticInsensitive]) == nil
+          }
+          let scan = (isRasterOnly || !missingKeywords.isEmpty)
+            ? Self.recognizeScannedPage(page, bounds: bounds,
+                keywords: isRasterOnly ? keywords : missingKeywords,
+                color: isRasterOnly ? wantedColor : "",
+                highlight: isRasterOnly && highlight,
+                underline: isRasterOnly && underline)
             : (text: "", masks: [[String: Any]]())
-          let text = scan.text.isEmpty ? extractedText : scan.text
+          let text = scan.text.isEmpty ? extractedText
+            : extractedText.isEmpty ? scan.text : extractedText + "\n" + scan.text
           var masks: [[String: Any]] = scan.masks
           var seen = Set<String>()
           func addSelection(_ selection: PDFSelection, answer: String) {
