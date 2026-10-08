@@ -163,3 +163,8 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 2026-10-08 签名前置准备收口：补齐未启用的 Codemagic 模板，固定 Flutter 3.47.4/revision 和 Xcode 26.6/17F113；签名前核对两条 GitHub CI 与完整应用 SHA，独立记录签名配置 SHA；从冻结 SHA 应用 overlay，替换 Study 身份、移除上游团队、校验 48 个图标与启动配置，沿用固定离线 PPTX 引擎及摘要。首份 signed RC 使用 0.9.0 + 递增构建号。导出后要求原生 codesign 校验及 profile/team/版本/平台检查，仅将通过检查的 IPA 副本交给发布器，保留 TestFlight，禁止自动正式商店提交。
 
 本机 18 项发布检查通过（含 pinned iOS 源码临时副本），初次缺 PyYAML 已在忽略目录安装固定 6.0.3 后复验。新增轻量 GitHub release-preflight 检查，不触发重复 PDF 模拟器测试；云端结果待本次提交后核对。SIGNING_AUDIT.md 列明已知配置修复及边界，RC1_SMOKE_TEST.md 保留 20 项未执行的真机验收栏。未修改 overlay 学习代码、存储格式或现有三类构建产物流水线。真实 macOS 签名、Apple processing、隐私/加密资料确认和真机验证尚未发生；用户无会员和 iPhone 是当前外部阻塞。恢复后先核对本次 release-preflight 最终日志，再等用户具备外部条件，按 CODEMAGIC_SETUP.md 手动启用。
+
+
+2026-10-08 发布准备云端复验完成：提交 `d79c96250c34a29dfc257b56345571563db70b54` 已推送，[GitHub release-preflight 37713847100](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37713847100) 整体绿色；已读取 job `113105692716` 完整日志，确认 18/18 检查通过（含 pinned iOS 副本），三个 Bash 脚本语法检查通过。签名模板继续休眠，未执行 Codemagic、Apple 上传或真实设备测试；核心应用仍以 `229c4d9` / `v0.9.0-rc1` 为验收基线。本次恢复没有修改 PDF/PPTX/OCR 或数据存储。当前暂停点为外部条件：用户决定 Apple 会员及找到可用 iPhone/测试者后，继续首次 signed RC/TestFlight，按 RC1_SMOKE_TEST.md 验收保存退出重开。
+
+归档保留说明：RC1 的 GitHub artifact 链接和摘要已记录；尝试通过连接器的临时下载链接保存 unsigned ZIP 时返回 HTTP 403，本机 `dist/rc1/` 未取得这份文件。不能声称已经本机备份。GitHub 原始 artifact 有效期仍为 2026-10-21，需在到期前从登录的 GitHub 下载保存或重新构建。

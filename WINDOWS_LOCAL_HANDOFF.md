@@ -1,6 +1,6 @@
 # Windows 本地任务交接 · Study iOS App
 
-> 2026-10-08 最新恢复入口：RC1 已冻结并推送为 `v0.9.0-rc1`（`229c4d9`），iOS `37630306419` 与 Windows `37630306519` 完整绿色。签名前准备见 `SIGNING_AUDIT.md`、`CODEMAGIC_SETUP.md`，首台 iPhone 清单见 `RC1_SMOKE_TEST.md`。用户已确认无 Apple Developer Program 会员、无可用 iPhone；不得自行开通付费。下一主线是取得这些外部条件后首次 Codemagic signed IPA → TestFlight → 真机保存重开，真实压力草稿后移。BrowserStack 仍仅上传验证。以下较早记录保留为历史，状态以 `BUILD_PROGRESS.md` 末尾和本段为准。
+> 2026-10-08 最新恢复入口：RC1 已冻结并推送为 `v0.9.0-rc1`（`229c4d9`），iOS `37630306419` 与 Windows `37630306519` 完整绿色。签名前准备提交 `d79c962` 已由 GitHub `37713847100` 复验 18/18 及脚本语法检查通过；详见 `SIGNING_AUDIT.md`、`CODEMAGIC_SETUP.md`，首台 iPhone 清单见 `RC1_SMOKE_TEST.md`。用户已确认无 Apple Developer Program 会员、无可用 iPhone；不得自行开通付费。下一主线是取得这些外部条件后首次 Codemagic signed IPA → TestFlight → 真机保存重开，真实压力草稿后移。BrowserStack 仍仅上传验证。以下较早记录保留为历史，状态以 `BUILD_PROGRESS.md` 末尾和本段为准。
 
 更新：2026-10-05。仓库：https://github.com/xiaoxiaoming676-pixel/study-app ，最新已完成跨平台验证的代码提交：`8c4d25f4c7d0819bab8eb35121231a88fa6390d7`；请以仓库实时 main 为准。
 

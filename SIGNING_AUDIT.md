@@ -4,7 +4,7 @@
 
 ## 当前结论
 
-已补齐旧模板的已知代码配置缺项，本机 18 项检查通过。模板仍为 `codemagic.template.yaml`，没有启用正式签名或向 Apple 上传；Windows 无法执行 Xcode/codesign。GitHub 的 RC1 双模拟器绿色属于原应用基线，不能视为新签名模板在 Codemagic 已通过。
+已补齐旧模板的已知代码配置缺项，本机 18 项检查通过；[GitHub 37713847100](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37713847100) 同样 18/18 及三个 Bash 脚本语法检查通过（提交 `d79c962`）。模板仍为 `codemagic.template.yaml`，没有启用正式签名或向 Apple 上传；Windows 无法执行 Xcode/codesign。GitHub 的 RC1 双模拟器绿色属于原应用基线，不能视为新签名模板在 Codemagic 已通过。
 
 | 检查项 | 处理与证据 | 剩余验证 |
 | --- | --- | --- |
