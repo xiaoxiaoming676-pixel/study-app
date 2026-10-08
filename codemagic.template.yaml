@@ -1,38 +1,55 @@
-# Copy this to codemagic.yaml only after the owner has an Apple Developer
-# Program membership, a matching App Store Connect app, and a Codemagic
-# Developer Portal integration named study-appstore.
+# Dormant: enable only after owner approval and Apple/Codemagic setup.
+# Application code remains the tested RC SHA; record signing config separately.
 workflows:
   study-testflight:
-    name: Study signed TestFlight IPA
+    name: Study RC signed TestFlight IPA
     max_build_duration: 120
     integrations:
       app_store_connect: study-appstore
     environment:
-      flutter: stable
+      flutter: '3.47.4'
+      xcode: '26.6'
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.xiaoxiaoming676.studyapp
+      vars:
+        STUDY_RC_SHA: '229c4d9afb1098dd93953577efb9d17d3ada49c3'
+        STUDY_IOS_RUN_ID: '37630306419'
+        STUDY_WINDOWS_RUN_ID: '37630306519'
+        STUDY_VERSION: '0.9.0'
+        STUDY_BUILD_OFFSET: '0'
+        # Set STUDY_APPLE_TEAM_ID in Codemagic after owner setup.
+        # Optional secret STUDY_GITHUB_READ_TOKEN: public Actions read only.
     scripts:
-      - name: Checkout pinned application source
+      - name: Require tested RC and prepare pinned source
+        script: bash tools/release/checkout_rc.sh
+      - name: Prepare Study identity and offline PPTX
         script: |
-          git clone https://github.com/saber-notes/saber.git source
-          git -C source checkout 5b396a40406c75835741f5c4555bc10ae816f121
-          cp -R overlay/. source/
-      - name: Resolve Flutter dependencies
-        script: |
+          set -euo pipefail
+          python3 tools/release/prepare_ios.py source
           cd source
+          bash ../tools/release/prepare_pptx.sh
           flutter pub get
-      - name: Apply Apple signing profiles
+      - name: Apply managed Apple signing profiles
         script: |
+          set -euo pipefail
           cd source
           xcode-project use-profiles
-      - name: Build signed IPA
+      - name: Build signed RC
         script: |
+          set -euo pipefail
           cd source
-          flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+          flutter build ipa --release --build-name="$STUDY_VERSION" \
+            --build-number="$STUDY_BUILD_NUMBER" \
+            --export-options-plist="$HOME/export_options.plist"
+      - name: Verify signed package before publishing
+        script: bash tools/release/check_signed.sh
     artifacts:
-      - source/build/ios/ipa/*.ipa
+      - release-evidence/Study-RC.ipa
+      - release-evidence/*.json
+      - release-evidence/SHA256SUMS
     publishing:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
+        submit_to_app_store: false

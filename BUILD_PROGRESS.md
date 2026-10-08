@@ -158,3 +158,8 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 2026-10-08 RC 主线切换及绿色复核：已通过 GitHub 连接器读取 `37630306519`、`37630306419` 的最终 job 状态，均 success；读取完整 iOS 日志确认 iPhone/iPad 学习与 PPTX、合成 120 页测试全部 `All tests passed!`，最终强制检查 skipped。为实际受测提交 `229c4d9afb1098dd93953577efb9d17d3ada49c3` 建立 annotated tag `v0.9.0-rc1`，工具链、产物、摘要及边界见 `RC1_BASELINE.md`。本轮合成 120 页导入 2479 ms、保存 1201 ms、峰值 RSS 744538112 字节。真实 PPTX 双模拟器通过，视觉门槛通过；不代表真实 iPhone 通过。
 
 用户已明确新的优先顺序：CI 绿色 → RC1 → Apple 签名/TestFlight → 第一台 iPhone 学习保存重开 → 真机大文件及恢复 → RC2 → v1.0.0。用户确认尚无 Apple Developer Program 会员，也没有可用 iPhone；不得自行开通账号、付费或改变签名路线。大文件草稿后移，不阻塞第一次 RC 安装。旧 Codemagic 模板尚缺 Study 身份替换、固定 Flutter 和离线 PPTX 引擎打包；`tools/release/` 已开始准备两个签名审计脚本，目前未接入流水线，尚需测试与模板补齐。正式签名/Apple 上传未执行。
+
+
+2026-10-08 签名前置准备收口：补齐未启用的 Codemagic 模板，固定 Flutter 3.47.4/revision 和 Xcode 26.6/17F113；签名前核对两条 GitHub CI 与完整应用 SHA，独立记录签名配置 SHA；从冻结 SHA 应用 overlay，替换 Study 身份、移除上游团队、校验 48 个图标与启动配置，沿用固定离线 PPTX 引擎及摘要。首份 signed RC 使用 0.9.0 + 递增构建号。导出后要求原生 codesign 校验及 profile/team/版本/平台检查，仅将通过检查的 IPA 副本交给发布器，保留 TestFlight，禁止自动正式商店提交。
+
+本机 18 项发布检查通过（含 pinned iOS 源码临时副本），初次缺 PyYAML 已在忽略目录安装固定 6.0.3 后复验。新增轻量 GitHub release-preflight 检查，不触发重复 PDF 模拟器测试；云端结果待本次提交后核对。SIGNING_AUDIT.md 列明已知配置修复及边界，RC1_SMOKE_TEST.md 保留 20 项未执行的真机验收栏。未修改 overlay 学习代码、存储格式或现有三类构建产物流水线。真实 macOS 签名、Apple processing、隐私/加密资料确认和真机验证尚未发生；用户无会员和 iPhone 是当前外部阻塞。恢复后先核对本次 release-preflight 最终日志，再等用户具备外部条件，按 CODEMAGIC_SETUP.md 手动启用。

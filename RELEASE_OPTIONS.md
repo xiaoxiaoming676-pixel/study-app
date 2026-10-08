@@ -1,5 +1,13 @@
 # iPhone 安装版路线与首版验收
 
+## 当前唯一主线（2026-10-08）
+
+RC1 `v0.9.0-rc1` 已冻结，双模拟器与 Windows 绿色。GitHub Actions 继续测试并输出 unsigned IPA / simulator ZIP / Windows EXE；Codemagic 负责未来签名与 TestFlight。最新证据见 [RC1_BASELINE.md](RC1_BASELINE.md)，签名前审计见 [SIGNING_AUDIT.md](SIGNING_AUDIT.md)。
+
+用户暂无 Apple Developer Program 会员和可用 iPhone。条件就绪前不启动签名；条件就绪后以首次真实 iPhone 学习、保存、退出、重开为最高里程碑。首份安装不等待真实大文件极限测试全部完成。
+
+下列 2026-10-06 安装路线调查仅保留为历史，**不是当前待选执行方案**；不切换到 Sideloadly、另一家付费真机平台或 GitHub Secrets 签名。BrowserStack 只有上传验证，不能标记为真机通过。
+
 核查日期：2026-10-06。目标设备以 iPhone 为主，兼顾 iPad；用户现在只有 Windows 电脑和 Android 手机，没有苹果设备。源码仓库为本仓库。
 
 ## 当前补充（2026-10-06）

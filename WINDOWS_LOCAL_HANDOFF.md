@@ -1,6 +1,6 @@
 # Windows 本地任务交接 · Study iOS App
 
-> 2026-10-07 晚间恢复入口：以 `BUILD_PROGRESS.md` 末尾为准。稳定 tag 为 `study-pptx-ocr-2026-10-07`（449294c）。90d40f7 的 Windows 两条 CI 绿色；iOS 37600320442 的真实 PPTX 双模拟器和质量门槛通过，但 iPad 首页读取半写入缩略图失败。最新修复让缩略图复用现有原子保存，静态分析及独立故障注入 2/2 通过，等待 CI。真实 160 页大文件测试草稿暂存在本机 `build/pending-real-stress/`，先恢复绿色，再接入压测。用户仍无苹果设备；BrowserStack 仅上传验证，正式签名未启用。
+> 2026-10-08 最新恢复入口：RC1 已冻结并推送为 `v0.9.0-rc1`（`229c4d9`），iOS `37630306419` 与 Windows `37630306519` 完整绿色。签名前准备见 `SIGNING_AUDIT.md`、`CODEMAGIC_SETUP.md`，首台 iPhone 清单见 `RC1_SMOKE_TEST.md`。用户已确认无 Apple Developer Program 会员、无可用 iPhone；不得自行开通付费。下一主线是取得这些外部条件后首次 Codemagic signed IPA → TestFlight → 真机保存重开，真实压力草稿后移。BrowserStack 仍仅上传验证。以下较早记录保留为历史，状态以 `BUILD_PROGRESS.md` 末尾和本段为准。
 
 更新：2026-10-05。仓库：https://github.com/xiaoxiaoming676-pixel/study-app ，最新已完成跨平台验证的代码提交：`8c4d25f4c7d0819bab8eb35121231a88fa6390d7`；请以仓库实时 main 为准。
 

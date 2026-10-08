@@ -1,0 +1,38 @@
+name: Verify Study release preparation
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/release/**'
+      - 'codemagic.template.yaml'
+      - '.github/workflows/study-release-preflight.yml'
+permissions:
+  contents: read
+jobs:
+  release-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: saber-notes/saber
+          ref: 5b396a40406c75835741f5c4555bc10ae816f121
+          path: pinned-source
+          persist-credentials: false
+          sparse-checkout: ios
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install YAML parser
+        run: python -m pip install PyYAML==6.0.3
+      - name: Validate release guards against pinned iOS source
+        env:
+          STUDY_UPSTREAM_IOS: ${{ github.workspace }}/pinned-source/ios
+        run: python -m unittest discover -s tools/release -p 'test_*.py' -v
+      - name: Check macOS script syntax without signing
+        run: |
+          for script in tools/release/*.sh; do
+            bash -n "$script"
+          done
