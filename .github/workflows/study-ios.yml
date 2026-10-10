@@ -263,4 +263,3 @@ jobs:
       - name: Enforce simulator test result
         if: steps.flow.outcome != 'success' || steps.large_pdf_flow.outcome != 'success' || steps.ipad_flow.outcome != 'success' || steps.pptx_flow.outcome != 'success' || steps.ipad_pptx_flow.outcome != 'success' || steps.pptx_quality.outcome != 'success'
         run: exit 1
-
