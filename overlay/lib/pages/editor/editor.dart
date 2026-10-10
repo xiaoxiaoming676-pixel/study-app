@@ -1220,37 +1220,89 @@ class EditorState extends State<Editor> {
     if (file?.path == null || !mounted) return false;
     const channel = MethodChannel('study.local/pptx');
     final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(SnackBar(
-      duration: const Duration(minutes: 4),
-      content: const Text('正在离线转换 PPTX…'),
-      action: SnackBarAction(
-        label: '取消',
-        onPressed: () => channel.invokeMethod<void>('cancel'),
-      ),
-    ));
+    final elapsed = ValueNotifier<int>(0);
+    final ticker = Timer.periodic(const Duration(seconds: 1), (_) => elapsed.value++);
+    BuildContext? progressContext;
+    bool cancelled = false;
+    final progress = showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        progressContext = dialogContext;
+        return PopScope(canPop: false, child: AlertDialog(
+          title: const Text('正在导入 PPTX'),
+          content: ValueListenableBuilder<int>(
+            valueListenable: elapsed,
+            builder: (_, seconds, __) => Column(mainAxisSize: MainAxisSize.min, children: [
+              const LinearProgressIndicator(),
+              const SizedBox(height: 16),
+              const Text('正在本机转换为 PDF，较大的演示文稿可能需要几分钟。'),
+              const SizedBox(height: 8),
+              Text('已等待 ${seconds ~/ 60} 分 ${(seconds % 60).toString().padLeft(2, '0')} 秒'),
+            ]),
+          ),
+          actions: [
+            StatefulBuilder(builder: (buttonContext, update) => TextButton(
+              onPressed: cancelled ? null : () {
+                update(() { cancelled = true; });
+                unawaited(channel.invokeMethod<void>('cancel').catchError((Object _) {}));
+              },
+              child: Text(cancelled ? '正在取消…' : '取消转换'),
+            )),
+          ],
+        ));
+      },
+    );
+    // Ensure the dialog has mounted before a fast native failure can dismiss it.
+    await WidgetsBinding.instance.endOfFrame;
     String? failure;
     String? convertedPath;
     try {
       convertedPath = await channel.invokeMethod<String>('convert', {
         'path': file!.path,
       });
-      if (convertedPath == null) failure = 'PPTX 转换没有生成 PDF';
+      if (convertedPath == null) failure = '没有生成 PDF，请检查 PPTX 文件。';
     } on PlatformException catch (error) {
-      failure = error.message ?? 'PPTX 转换失败';
+      failure = switch (error.code) {
+        'PPTX_CANCELLED' => '已取消 PPTX 导入。',
+        'PPTX_INPUT' => '文件无效或超过 16 MB，请拆分演示文稿后重试。',
+        'PPTX_LIMIT' || 'PPTX_OUTPUT' || 'PPTX_MEMORY' =>
+          '页数、页面尺寸或文件体积超出转换限制，请拆分后重试。',
+        'PPTX_TIMEOUT' => '转换超时，请拆分文件或先转成 PDF。',
+        _ => error.message ?? 'PPTX 转换失败，请检查文件或改用 PDF。',
+      };
     } catch (_) {
-      failure = 'PPTX 转换失败，请检查文件或改用 PDF';
+      failure = 'PPTX 转换失败，请检查文件或改用 PDF。';
+    } finally {
+      ticker.cancel();
+      if (progressContext?.mounted ?? false) {
+        Navigator.of(progressContext!).pop();
+      } else if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      await progress;
+      elapsed.dispose();
     }
     if (!mounted) return false;
-    messenger.hideCurrentSnackBar();
+    if (cancelled) return false;
     if (failure != null) {
       messenger.showSnackBar(SnackBar(content: Text(failure)));
       return false;
     }
+    messenger.showSnackBar(const SnackBar(
+      duration: Duration(minutes: 1), content: Text('转换完成，正在导入页面…')));
     try {
-      return await importPdfFromFilePath(convertedPath!);
+      final imported = await importPdfFromFilePath(convertedPath!);
+      if (mounted) {
+        messenger.hideCurrentSnackBar();
+        messenger.showSnackBar(SnackBar(content: Text(
+          imported ? 'PPTX 已导入，可以书写、挖空和朗读。' : '页面导入未完成，请重新导入。')));
+      }
+      return imported;
     } catch (_) {
       if (mounted) {
-        messenger.showSnackBar(const SnackBar(content: Text('转换后的 PDF 导入失败')));
+        messenger.hideCurrentSnackBar();
+        messenger.showSnackBar(const SnackBar(content: Text('转换成功，但页面导入失败，请先转成 PDF 再导入。')));
       }
       return false;
     }
@@ -2195,3 +2247,4 @@ class EditorState extends State<Editor> {
     }
   }
 }
+

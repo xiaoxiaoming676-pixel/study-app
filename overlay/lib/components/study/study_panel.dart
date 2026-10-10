@@ -557,16 +557,32 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
           if (_dirty && !_saving) TextButton(onPressed: () => _persist({}), child: const Text('重试保存')),
           TextButton(onPressed: () => setState(() { _error = null; }), child: const Text('关闭')),
         ]),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: Align(alignment: Alignment.centerLeft, child: Text(
+            [
+              '阅读教材；需要在页面上手写时点下方“返回书写”。',
+              _delete ? '点按已挖空区域可删除；关闭“点选删除”后拖动可手动框选。'
+                  : '拖动框选挖空区域，或点“自动挖空”按关键词、颜色等识别。',
+              '点按页面中的空格，用文字或手写作答。',
+              '选择声音和语速后开始朗读；可连续听后续页面。',
+            ][_tab],
+            style: Theme.of(context).textTheme.bodySmall,
+          )),
+        ),
         Expanded(child: _tab == 3 ? _audioControls() : _canvas()),
         if (_tab == 1) SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
           TextButton.icon(onPressed: _busy ? null : _rules, icon: const Icon(Icons.auto_fix_high), label: const Text('自动挖空')),
           FilterChip(label: const Text('点选删除'), selected: _delete, onSelected: (v) => setState(() { _delete = v; })),
           TextButton(onPressed: () => setState(() { _transform.value = Matrix4.identity(); }), child: const Text('复位缩放')),
         ])),
-        if (_tab == 0 || _tab == 2) Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+        if (_tab == 0 || _tab == 2) SingleChildScrollView(scrollDirection: Axis.horizontal,
+          child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           TextButton(onPressed: () => setState(() { _showOriginal = !_showOriginal; }), child: Text(_showOriginal ? '隐藏原文' : '查看原文')),
           TextButton(onPressed: () async { await _stop(); if (mounted) await _persist({_page: _state.copyWith(hidden: !_state.hidden)}); }, child: Text(_state.hidden ? '切换原文学习' : '切换挖空练习')),
-        ]),
+          TextButton.icon(onPressed: _busy ? null : _leave,
+            icon: const Icon(Icons.draw_outlined), label: const Text('返回书写')),
+        ])),
       ])),
       bottomNavigationBar: NavigationBar(selectedIndex: _tab, height: 64,
         onDestinationSelected: (v) => setState(() { _tab = v; _pending = null; _start = null; }),
