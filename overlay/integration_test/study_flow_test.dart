@@ -177,6 +177,15 @@ void main() {
     await tester.tap(find.text('生成候选'));
     final saveCandidates = find.text('保存候选').hitTestable();
     await waitFor(tester, saveCandidates);
+    await tester.tap(find.text('第 1 页 · 1 空'));
+    await waitFor(tester, find.text('Alpha'));
+    await waitFor(tester, find.descendant(
+      of: find.byType(StudyPanel), matching: find.byType(Image)));
+    await tester.tap(find.text('Alpha'));
+    await waitFor(tester, find.text('修改挖空区域'));
+    await tester.enterText(find.byType(TextFormField).at(1), '20.0');
+    await tester.tap(find.text('保存修改'));
+    await waitFor(tester, saveCandidates);
     await tester.tap(saveCandidates);
     await waitFor(tester, find.textContaining('0 / 1 已答'));
     final enabledNote = find.byWidgetPredicate((widget) =>
@@ -196,6 +205,7 @@ void main() {
     final saved = await EditorCoreInfo.loadFromFilePath(notePath);
     expect(saved.pages.first.strokes, isNotEmpty);
     expect(saved.pages.first.cloze.masks.single.answer, 'Alpha');
+    expect(saved.pages.first.cloze.masks.single.rect.left, closeTo(0.2, 0.000001));
     expect(saved.pages.first.cloze.note, '这段需要复习');
 
     // Verify that the PDF asset survived note serialization byte for byte.
