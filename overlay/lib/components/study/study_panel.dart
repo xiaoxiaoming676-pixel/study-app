@@ -324,22 +324,23 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
   }
 
   Future<ClozeMask?> _editCandidate(BuildContext context, ClozeMask mask) async {
-    final answer = TextEditingController(text: mask.answer);
+    String answer = mask.answer;
     final values = [
       mask.rect.left, mask.rect.top, mask.rect.width, mask.rect.height,
-    ].map((value) => TextEditingController(text: (value * 100).toStringAsFixed(1))).toList();
+    ].map((value) => (value * 100).toStringAsFixed(1)).toList();
     final form = GlobalKey<FormState>();
-    try {
-      return await showDialog<ClozeMask>(context: context, builder: (dialogContext) => AlertDialog(
+    return await showDialog<ClozeMask>(context: context, builder: (dialogContext) => AlertDialog(
         title: const Text('修改挖空区域'),
         content: SizedBox(width: 320, child: Form(key: form, child: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            TextFormField(controller: answer, decoration: const InputDecoration(labelText: '答案（可留空）')),
+            TextFormField(initialValue: answer, onChanged: (value) => answer = value,
+              decoration: const InputDecoration(labelText: '答案（可留空）')),
             const SizedBox(height: 12),
             const Text('位置和大小按页面百分比填写'),
             for (int i = 0; i < values.length; i++)
               TextFormField(
-                controller: values[i],
+                initialValue: values[i],
+                onChanged: (value) => values[i] = value,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(labelText: ['左边距', '上边距', '宽度', '高度'][i]),
                 validator: (value) {
@@ -354,7 +355,7 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
           TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('取消')),
           FilledButton(onPressed: () {
             if (!form.currentState!.validate()) return;
-            final numbers = values.map((v) => double.parse(v.text.trim()) / 100).toList();
+            final numbers = values.map((v) => double.parse(v.trim()) / 100).toList();
             if (numbers[0] + numbers[2] > 1.000001 || numbers[1] + numbers[3] > 1.000001) {
               ScaffoldMessenger.of(dialogContext).showSnackBar(
                 const SnackBar(content: Text('区域超出页面，请调整位置或大小。')));
@@ -362,14 +363,10 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
             }
             Navigator.pop(dialogContext, ClozeMask(
               Rect.fromLTWH(numbers[0], numbers[1], numbers[2], numbers[3]),
-              answer: answer.text.trim()));
+              answer: answer.trim()));
           }, child: const Text('保存修改')),
         ],
       ));
-    } finally {
-      answer.dispose();
-      for (final controller in values) { controller.dispose(); }
-    }
   }
 
   Future<void> _importRules() => _run('导入规则', () async {
