@@ -2,7 +2,7 @@ name: Build Study iOS
 on:
   workflow_dispatch:
   push:
-    branches: [main, codex/study-ux-improvements]
+    branches: [main]
     paths:
       - 'overlay/**'
       - '.github/workflows/study-ios.yml'
