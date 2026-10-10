@@ -1,5 +1,10 @@
 # 构建与测试进度
 
+2026-10-10 · 第一批界面完善（开发分支 codex/study-ux-improvements）
+
+- 已完成挖空候选按页加载原文预览、区域叠加、答案及位置修改、移除候选；保存状态在学习页直接显示，失败时可见重试按钮。
+- 继续完善学习操作提示与 PPTX 导入反馈；此处仅记录开发进度，待 CI 和设备验证后再标记完成。
+
 2026-09-17
 
 第一次运行 35235644496 已完成环境搭建与依赖安装。Flutter 3.47.4、Dart 3.13.3、Xcode 26.6。
@@ -168,3 +173,4 @@ GitHub API 再次确认第十三次运行的第二次尝试只有 1 个失败作
 2026-10-08 发布准备云端复验完成：提交 `d79c96250c34a29dfc257b56345571563db70b54` 已推送，[GitHub release-preflight 37713847100](https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/37713847100) 整体绿色；已读取 job `113105692716` 完整日志，确认 18/18 检查通过（含 pinned iOS 副本），三个 Bash 脚本语法检查通过。签名模板继续休眠，未执行 Codemagic、Apple 上传或真实设备测试；核心应用仍以 `229c4d9` / `v0.9.0-rc1` 为验收基线。本次恢复没有修改 PDF/PPTX/OCR 或数据存储。当前暂停点为外部条件：用户决定 Apple 会员及找到可用 iPhone/测试者后，继续首次 signed RC/TestFlight，按 RC1_SMOKE_TEST.md 验收保存退出重开。
 
 归档保留说明：RC1 的 GitHub artifact 链接和摘要已记录；尝试通过连接器的临时下载链接保存 unsigned ZIP 时返回 HTTP 403，本机 `dist/rc1/` 未取得这份文件。不能声称已经本机备份。GitHub 原始 artifact 有效期仍为 2026-10-21，需在到期前从登录的 GitHub 下载保存或重新构建。
+

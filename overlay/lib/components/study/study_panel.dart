@@ -82,16 +82,25 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
     final index = _page;
     setState(() { _preview = null; });
     try {
-      final pages = widget.coreInfo.pages.toList();
-      pages[index] = pages[index].copyWith(cloze: ClozeState());
-      final image = await EditorExporter.screenshotPage(
-        coreInfo: widget.coreInfo.copyWith(pages: pages), pageIndex: index,
-        rasterizeAllStrokes: true, pixelRatio: 1.2);
-      final data = await image.toByteData(format: ui.ImageByteFormat.png);
-      image.dispose();
-      if (mounted && generation == _previewGeneration) setState(() { _preview = data!.buffer.asUint8List(); });
+      final bytes = await _renderCleanPage(index);
+      if (mounted && generation == _previewGeneration) setState(() { _preview = bytes; });
     } catch (e) {
       if (mounted && generation == _previewGeneration) setState(() { _error = '页面加载失败：$e'; });
+    }
+  }
+
+  Future<Uint8List> _renderCleanPage(int index) async {
+    final pages = widget.coreInfo.pages.toList();
+    pages[index] = pages[index].copyWith(cloze: ClozeState());
+    final image = await EditorExporter.screenshotPage(
+      coreInfo: widget.coreInfo.copyWith(pages: pages), pageIndex: index,
+      rasterizeAllStrokes: true, pixelRatio: 1.2);
+    try {
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (data == null) throw const FormatException('页面预览生成失败');
+      return data.buffer.asUint8List();
+    } finally {
+      image.dispose();
     }
   }
 
@@ -106,7 +115,7 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
       try { ok = await widget.onChanged(snapshot); } catch (_) { ok = false; }
       if (mounted && revision == _revision) setState(() {
         _saving = false; _dirty = !ok;
-        if (!ok) _error = '保存未完成，请点“重试保存”，暂勿关闭应用。';
+        _error = ok ? null : '保存未完成，请点“重试保存”，暂勿关闭应用。';
       });
       return ok;
     });
@@ -218,28 +227,149 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
   }
 
   Future<bool> _reviewCandidates(Map<int, ClozeState> changes, String summary) async {
-    // Review every candidate's answer and normalized region; deselection is applied before persistence.
-    return await showModalBottomSheet<bool>(context: context, isScrollControlled: true,
-      builder: (context) => StatefulBuilder(builder: (context, update) => SafeArea(child: SizedBox(
-        height: MediaQuery.sizeOf(context).height * 0.8,
-        child: Column(children: [Padding(padding: const EdgeInsets.all(16), child: Text(summary)),
-          Expanded(child: ListView(children: [for (final entry in changes.entries)
-            ExpansionTile(title: Text('第 ${entry.key + 1} 页 · ${entry.value.masks.length} 空'), children: [
-              for (final mask in entry.value.masks) ListTile(
-                title: Text(mask.answer.isEmpty ? '手动区域' : mask.answer),
-                subtitle: Text('页面纵向 ${(mask.rect.top * 100).round()}% 处'),
-                trailing: IconButton(icon: const Icon(Icons.close), onPressed: () => update(() {
-                  changes[entry.key] = changes[entry.key]!.removeMask(mask);
-                })),
+    int? previewPage;
+    Uint8List? previewImage;
+    String? previewError;
+    bool previewLoading = false;
+    int previewGeneration = 0;
+    return await showModalBottomSheet<bool>(
+      context: context, isScrollControlled: true,
+      builder: (sheetContext) => StatefulBuilder(builder: (sheetContext, update) {
+        Future<void> selectPage(int index) async {
+          final generation = ++previewGeneration;
+          update(() { previewPage = index; previewImage = null; previewError = null; previewLoading = true; });
+          try {
+            final bytes = index == _page && _preview != null ? _preview! : await _renderCleanPage(index);
+            if (sheetContext.mounted && generation == previewGeneration) {
+              update(() { previewImage = bytes; previewLoading = false; });
+            }
+          } catch (_) {
+            if (sheetContext.mounted && generation == previewGeneration) {
+              update(() { previewError = '预览失败，仍可检查候选文字。'; previewLoading = false; });
+            }
+          }
+        }
+
+        return SafeArea(child: SizedBox(
+          height: MediaQuery.sizeOf(sheetContext).height * 0.82,
+          child: Column(children: [
+            Padding(padding: const EdgeInsets.all(12), child: Text(summary)),
+            if (previewPage != null) SizedBox(height: 210, child: Center(
+              child: previewLoading ? const CircularProgressIndicator()
+                  : previewError != null ? Text(previewError!)
+                  : previewImage == null ? const SizedBox.shrink()
+                  : FittedBox(fit: BoxFit.contain, child: SizedBox(
+                      width: 210 * widget.coreInfo.pages[previewPage!].size.aspectRatio,
+                      height: 210,
+                      child: Stack(fit: StackFit.expand, children: [
+                        Image.memory(previewImage!, fit: BoxFit.fill),
+                        for (final mask in changes[previewPage!]!.masks)
+                          Positioned.fromRect(
+                            rect: mask.onPage(Size(210 * widget.coreInfo.pages[previewPage!].size.aspectRatio, 210)),
+                            child: DecoratedBox(decoration: BoxDecoration(
+                              color: Colors.teal.withValues(alpha: 0.25),
+                              border: Border.all(color: Colors.teal, width: 2))),
+                          ),
+                      ]))),
+            )),
+            Expanded(child: ListView(children: [
+              for (final entry in changes.entries)
+                ExpansionTile(
+                  title: Text('第 ${entry.key + 1} 页 · ${entry.value.masks.length} 空'),
+                  onExpansionChanged: (expanded) { if (expanded) selectPage(entry.key); },
+                  children: [
+                    for (final mask in entry.value.masks) ListTile(
+                      title: Text(mask.answer.isEmpty ? '手动区域（未录入答案）' : mask.answer),
+                      subtitle: Text('横向 ${(mask.rect.left * 100).round()}%，纵向 ${(mask.rect.top * 100).round()}% · 点按修改'),
+                      onTap: () async {
+                        await selectPage(entry.key);
+                        if (!sheetContext.mounted) return;
+                        final edited = await _editCandidate(sheetContext, mask);
+                        if (edited != null && sheetContext.mounted) {
+                          update(() {
+                            final state = changes[entry.key]!;
+                            changes[entry.key] = state.copyWith(
+                              masks: [for (final item in state.masks) if (item.key == mask.key) edited else item],
+                              responses: edited.key == mask.key ? state.responses
+                                  : ({...state.responses}..remove(mask.key)),
+                            );
+                          });
+                        }
+                      },
+                      trailing: IconButton(
+                        tooltip: '移除此空',
+                        icon: const Icon(Icons.close),
+                        onPressed: () => update(() {
+                          changes[entry.key] = changes[entry.key]!.removeMask(mask);
+                        }),
+                      ),
+                    ),
+                  ],
+                ),
+            ])),
+            Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [
+              const Spacer(),
+              TextButton(onPressed: () => Navigator.pop(sheetContext, false), child: const Text('取消')),
+              const SizedBox(width: 8),
+              FilledButton(
+                onPressed: changes.values.every((state) => state.masks.isEmpty)
+                    ? null : () => Navigator.pop(sheetContext, true),
+                child: const Text('保存候选')),
+            ])),
+            const SizedBox(height: 12),
+          ]),
+        ));
+      }),
+    ) ?? false;
+  }
+
+  Future<ClozeMask?> _editCandidate(BuildContext context, ClozeMask mask) async {
+    final answer = TextEditingController(text: mask.answer);
+    final values = [
+      mask.rect.left, mask.rect.top, mask.rect.width, mask.rect.height,
+    ].map((value) => TextEditingController(text: (value * 100).toStringAsFixed(1))).toList();
+    final form = GlobalKey<FormState>();
+    try {
+      return await showDialog<ClozeMask>(context: context, builder: (dialogContext) => AlertDialog(
+        title: const Text('修改挖空区域'),
+        content: SizedBox(width: 320, child: Form(key: form, child: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            TextFormField(controller: answer, decoration: const InputDecoration(labelText: '答案（可留空）')),
+            const SizedBox(height: 12),
+            const Text('位置和大小按页面百分比填写'),
+            for (int i = 0; i < values.length; i++)
+              TextFormField(
+                controller: values[i],
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(labelText: ['左边距', '上边距', '宽度', '高度'][i]),
+                validator: (value) {
+                  final n = double.tryParse(value?.trim() ?? '');
+                  return n == null || !n.isFinite || n < 0 || n > 100 || (i > 1 && n == 0)
+                      ? '请输入 0 到 100 的有效数值' : null;
+                },
               ),
-            ]),
-          ])),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
-            FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('保存候选')),
-          ]), const SizedBox(height: 12),
-        ]),
-      )))) ?? false;
+          ]),
+        ))),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('取消')),
+          FilledButton(onPressed: () {
+            if (!form.currentState!.validate()) return;
+            final numbers = values.map((v) => double.parse(v.text.trim()) / 100).toList();
+            if (numbers[0] + numbers[2] > 1.000001 || numbers[1] + numbers[3] > 1.000001) {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                const SnackBar(content: Text('区域超出页面，请调整位置或大小。')));
+              return;
+            }
+            Navigator.pop(dialogContext, ClozeMask(
+              Rect.fromLTWH(numbers[0], numbers[1], numbers[2], numbers[3]),
+              answer: answer.text.trim()));
+          }, child: const Text('保存修改')),
+        ],
+      ));
+    } finally {
+      answer.dispose();
+      for (final controller in values) { controller.dispose(); }
+    }
   }
 
   Future<void> _importRules() => _run('导入规则', () async {
@@ -406,13 +536,27 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
         ]),
       body: SafeArea(child: Column(children: [
         Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [
-          Expanded(child: Text(_saving ? '正在保存…' : _dirty ? '未保存，请重试' : '已保存', style: TextStyle(fontSize: 12, color: _dirty && !_saving ? Colors.red : Colors.teal))),
+          Expanded(child: _dirty && !_saving
+            ? TextButton.icon(
+                onPressed: () => _persist({}),
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('未保存 · 点击重试'))
+            : Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(_saving ? Icons.sync : Icons.check_circle_outline, size: 16,
+                    color: _saving ? Colors.orange : Colors.teal),
+                const SizedBox(width: 4),
+                Text(_saving ? '正在保存…' : '已保存',
+                    style: TextStyle(color: _saving ? Colors.orange : Colors.teal)),
+              ])),
           Text('${_state.responses.length} / ${_state.masks.length} 已答', style: const TextStyle(fontSize: 12)),
           IconButton(onPressed: _busy || _page == 0 ? null : () => _navigate(_page - 1), icon: const Icon(Icons.chevron_left)),
           IconButton(onPressed: _busy || _page + 1 >= _count ? null : () => _navigate(_page + 1), icon: const Icon(Icons.chevron_right)),
         ])),
         if (_busy) Column(children: [const LinearProgressIndicator(), Text(_operation)]),
-        if (_error != null) MaterialBanner(content: Text(_error!, maxLines: 3, overflow: TextOverflow.ellipsis), actions: [TextButton(onPressed: () => setState(() { _error = null; }), child: const Text('关闭'))]),
+        if (_error != null) MaterialBanner(content: Text(_error!, maxLines: 3, overflow: TextOverflow.ellipsis), actions: [
+          if (_dirty && !_saving) TextButton(onPressed: () => _persist({}), child: const Text('重试保存')),
+          TextButton(onPressed: () => setState(() { _error = null; }), child: const Text('关闭')),
+        ]),
         Expanded(child: _tab == 3 ? _audioControls() : _canvas()),
         if (_tab == 1) SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
           TextButton.icon(onPressed: _busy ? null : _rules, icon: const Icon(Icons.auto_fix_high), label: const Text('自动挖空')),
@@ -511,3 +655,4 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
     super.dispose();
   }
 }
+
