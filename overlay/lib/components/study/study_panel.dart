@@ -560,13 +560,13 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           child: Align(alignment: Alignment.centerLeft, child: Text(
-            [
-              '阅读教材；需要在页面上手写时点下方“返回书写”。',
-              _delete ? '点按已挖空区域可删除；关闭“点选删除”后拖动可手动框选。'
+            switch (_tab) {
+              0 => '阅读教材；需要在页面上手写时点下方“返回书写”。',
+              1 => _delete ? '点按已挖空区域可删除；关闭“点选删除”后拖动可手动框选。'
                   : '拖动框选挖空区域，或点“自动挖空”按关键词、颜色等识别。',
-              '点按页面中的空格，用文字或手写作答。',
-              '选择声音和语速后开始朗读；可连续听后续页面。',
-            ][_tab],
+              2 => '点按页面中的空格，用文字或手写作答。',
+              _ => '选择声音和语速后开始朗读；可连续听后续页面。',
+            },
             style: Theme.of(context).textTheme.bodySmall,
           )),
         ),
@@ -671,4 +671,3 @@ class _StudyPanelState extends State<StudyPanel> with WidgetsBindingObserver {
     super.dispose();
   }
 }
-

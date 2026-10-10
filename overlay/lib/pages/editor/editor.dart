@@ -1233,7 +1233,7 @@ class EditorState extends State<Editor> {
           title: const Text('正在导入 PPTX'),
           content: ValueListenableBuilder<int>(
             valueListenable: elapsed,
-            builder: (_, seconds, __) => Column(mainAxisSize: MainAxisSize.min, children: [
+            builder: (_, seconds, child) => Column(mainAxisSize: MainAxisSize.min, children: [
               const LinearProgressIndicator(),
               const SizedBox(height: 16),
               const Text('正在本机转换为 PDF，较大的演示文稿可能需要几分钟。'),
@@ -1275,8 +1275,9 @@ class EditorState extends State<Editor> {
       failure = 'PPTX 转换失败，请检查文件或改用 PDF。';
     } finally {
       ticker.cancel();
-      if (progressContext?.mounted ?? false) {
-        Navigator.of(progressContext!).pop();
+      final dialogContext = progressContext;
+      if (dialogContext != null && dialogContext.mounted) {
+        Navigator.of(dialogContext).pop();
       } else if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
       }
@@ -2247,4 +2248,3 @@ class EditorState extends State<Editor> {
     }
   }
 }
-
