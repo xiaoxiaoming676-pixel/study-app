@@ -9,6 +9,8 @@
 - 首轮 CI 38038612866 在静态分析阶段因 5 条代码规范提示失败；已按日志修复集合表达式、异步 context 使用、占位参数及文件末尾空行，等待复跑。
 - 第二轮 CI 38038791782 只剩集成测试文件末尾多余空行，已修复并再次提交。
 - 第三轮 CI 38038984627：静态分析、单元测试、120 页 PDF、PPTX 转换与对比、无签名 iOS/模拟器编译通过；iPhone/iPad 学习流程失败，最终门禁为红。日志指向候选编辑弹窗在路由退出动画期间过早释放 TextEditingController，连带触发界面异常和后续断言超时。已改为由 TextFormField 自行管理字段生命周期，待重跑验证。先前“学习流程通过”的临时判断已更正。
+- 第四轮 CI 38041570443 结论 success（代码提交 cf309181）：静态分析、单元测试、iPhone/iPad 学习流程（含候选编辑与保存重开）、120 页 PDF、iPhone/iPad 离线 PPTX、参考 PDF 视觉对比、无签名 iOS 编译、模拟器编译及启动冒烟检查均通过。运行记录：https://github.com/xiaoxiaoming676-pixel/study-app/actions/runs/38041570443
+- 产物：Study-unsigned-iOS-app（artifact 11667046875）和 Study-iOS-simulator-app（artifact 11667516784），GitHub 页面标记有效期至 2026-10-24；无签名包不可直接在真机安装。撤除临时开发分支 CI 触发规则。尚未验证真实 iPhone/iPad、签名和分发；本轮软件界面改动不改变这些外部条件。
 
 2026-09-17
 
