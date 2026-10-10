@@ -255,4 +255,3 @@ void main() {
     await waitFor(tester, find.text('这段需要复习'));
   }, timeout: const Timeout(Duration(minutes: 10)));
 }
-
